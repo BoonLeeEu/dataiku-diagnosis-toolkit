@@ -82,11 +82,26 @@ that step on later launches, and reinstalling automatically after a dependency c
 execs the real server. Install output goes to stderr, since MCP talks JSON-RPC over stdout.
 
 Practically: the first time the server starts after installing or updating the plugin, expect
-a delay of up to a minute or so while it installs; after that it starts instantly. Requires
-Python 3.10+ to be on `PATH` (or `DATAIKU_PYTHON` to point at one; failures are logged to `launcher.log`) (or under `/opt/homebrew/bin` or `/usr/local/bin`),
-and `bash` on `PATH` (macOS/Linux native; Windows needs WSL or Git Bash, since `orient.sh` is also
-a shell script). If the server fails to start, check the plugin's MCP server logs for the
-underlying `pip` error.
+a delay of up to a minute or so while it installs; after that it starts instantly.
+
+**Host requirements.** The launcher builds a private virtualenv and installs every Python
+dependency into it (PyYAML, openpyxl, python-pptx, Pillow, lxml, `mcp`), so none of those need to
+be installed on the host. The host needs only:
+
+1. **Python 3.10 or newer, with the `venv` module and `pip`.** The `mcp` package requires 3.10+; Python 3.9 does not work.
+   The launcher takes the first suitable interpreter from: `DATAIKU_PYTHON` (full path, if set), `python3.13` to
+   `python3.10`, `/opt/homebrew/bin/python3`, `/usr/local/bin/python3`, then `python3` on `PATH`. If your 3.10+ is
+   elsewhere (for example an app-bundled runtime), set `DATAIKU_PYTHON` to it.
+2. **`bash`** on `PATH` (macOS/Linux native; Windows needs WSL or Git Bash, since `orient.sh` is also a shell script).
+3. **Network access to PyPI on first launch**, for the `pip install` (and again after `requirements.txt` changes).
+4. **A writable install location** for the virtualenv: the plugin folder under Claude Code, or the plugin-data
+   directory under Codex.
+
+If any of these is missing the server does not start and its tools (`write_summary`, `analyze_checklist`,
+`build_platform_review_deck`, `validate_deck`) do not appear. The launcher writes its own failures (no suitable
+Python) to `launcher.log`; `pip` errors appear only in the host's MCP server log. The review skill's manual
+Summary fallback still works without the server, but the agent must then run the scripts with a Python that has
+openpyxl and PyYAML.
 
 If you'd rather not wait on the lazy build, you can still run the setup manually up front:
 

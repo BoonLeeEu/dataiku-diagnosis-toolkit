@@ -1,6 +1,6 @@
 {
   "name": "dataiku-diagnosis-toolkit",
-  "version": "0.38.7",
+  "version": "0.38.8",
   "description": "Review a Dataiku DSS diagnosis bundle against a checklist spreadsheet, then generate a branded customer-facing Platform Review deck from the completed checklist.",
   "author": {
     "name": "Boon Lee Eu"

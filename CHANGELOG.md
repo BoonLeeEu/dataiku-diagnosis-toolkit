@@ -17,6 +17,12 @@ vendored components (`skills/dataiku-diagnosis-reader/`, `mcp-server-review-gene
 - `verdict-rules.md` moved from `skills/dataiku-diagnosis-checklist-review/references/` to `docs/verdict-rules.md`: it is a maintainer spec the model never reads. `tests/test_skill_boundaries.py` still scans it for reader-owned layout terms.
 - Checklist `SKILL.md` (230 to 202 lines): Verdicts is now its own step 2 (later steps renumbered; steps 4, 6 and 7 keep their numbers); removed repeated `notes` format, column lists, fact enumeration, reviewer format and status guidance; the evidence-planning step is one sentence; Deliver is a numbered list.
 
+## [0.38.8] - 2026-10-11
+
+### Changed
+
+- README and `CODEX_SETUP.md` list the host requirements (Python 3.10+ with `venv`/`pip`, `bash`, PyPI access on first launch, a writable install location) and say that the plugin's own virtualenv supplies every Python dependency.
+
 ## [0.38.7] - 2026-10-11
 
 ### Changed

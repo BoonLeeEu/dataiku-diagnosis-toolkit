@@ -6,7 +6,20 @@ This repository can be installed as a local Codex plugin while keeping its Claud
 
 From this repository, run `codex plugin marketplace list`. Codex may already discover the existing `dataiku-local` marketplace from `.claude-plugin/marketplace.json`. If it does not, run `codex plugin marketplace add /absolute/path/to/this/repo`. Then run `codex plugin add dataiku-diagnosis-toolkit@dataiku-local` and start a new Codex session.
 
-The plugin launches one local stdio MCP server (the review generator). It needs `bash` and Python 3.10+. If the system `python3` is older, set `DATAIKU_PYTHON` to a 3.10+ interpreter; if the review generator tools (`write_summary` etc.) are missing, read `launcher.log` in the plugin-data directory, and use the manual Summary fallback meanwhile. The Codex launcher mirrors only the server source into Codex's writable `PLUGIN_DATA` directory and runs the existing launch script there. The first launch installs dependencies in that directory.
+The plugin launches one local stdio MCP server (the review generator). The Codex launcher mirrors only the server source into Codex's writable `PLUGIN_DATA` directory and runs the existing launch script there. The first launch creates a virtualenv in that directory and installs the server's Python dependencies (PyYAML, openpyxl, python-pptx, Pillow, lxml, `mcp`) into it.
+
+## Host requirements
+
+For the MCP server, the host needs:
+
+1. **Python 3.10 or newer, with `venv` and `pip`.** Python 3.9 does not work (the `mcp` package needs 3.10+). The launcher picks the first suitable interpreter from `DATAIKU_PYTHON` (full path, if set), `python3.13` to `python3.10`, `/opt/homebrew/bin/python3`, `/usr/local/bin/python3`, then `python3` on `PATH`. A runtime bundled inside another app is not on `PATH`, so set `DATAIKU_PYTHON` to it.
+2. **`bash`.**
+3. **Network access to PyPI on the first launch** (and after `requirements.txt` changes).
+4. **A writable `PLUGIN_DATA` directory.**
+
+If one is missing the server does not start and `write_summary`, `analyze_checklist`, `build_platform_review_deck` and `validate_deck` do not appear in the session. The launcher writes a missing-Python failure to `launcher.log` in the plugin-data directory; `pip` errors appear only in Codex's MCP server log.
+
+The checklist review also runs `scripts/run_step.py` in Codex's shell. Its workbook steps require `openpyxl` in the Python interpreter used there, even when the MCP server is available. Use a Python 3.10+ interpreter with `openpyxl`, such as the server virtualenv at `$PLUGIN_DATA/review-generator/mcp-server-review-generator/.venv/bin/python3` when that path is available to the shell. The manual Summary fallback also needs a Python with `openpyxl` for workbook edits.
 
 ## Branding template
 
