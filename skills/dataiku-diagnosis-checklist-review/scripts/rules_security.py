@@ -102,7 +102,7 @@ def _toggle(facts, key, *, want, off_status, label):
         return _missing(f"{key}")
     if value is want:
         return verdict("Pass", f"{label}: {key}={str(value).lower()}", **{key: value})
-    reason = f"{label}: {key}={str(value).lower()}"
+    reason = f"expected {label}, but {key}={str(value).lower()}"
     if off_status == "Needs Review":
         reason += " (ask whether intentional)"
     return verdict(off_status, reason, **{key: value})

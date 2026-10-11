@@ -106,6 +106,8 @@ Kubernetes-only check below is **Not Applicable**, even if Kubernetes execution 
 | GENAI-007 Cobuild defaults | all three default ids set | never | any unset, or block missing = Needs Review |
 | GENAI-008 AI assistant logs | never | never | always Needs Review: the option's state can't be read from a bundle (the reason says whether DSS is older than 14.7) |
 | GENAI-009 Agent Hub | never | never | installed = Needs Review. Not installed, or no plugin configuration = Not Applicable |
+| GENAI-010 Agent Hub service account | never | never | installed = Needs Review. Not installed, or no plugin configuration = Not Applicable |
+| GENAI-011 Agent Hub impersonation scope | never | never | installed = Needs Review. Not installed, or no plugin configuration = Not Applicable |
 
 A connection setting counts as set when it holds a value (the reader finds the warehouse fast-write, Spark native and UDF settings by name pattern). The bundle can't link a warehouse to its cloud storage connection, so storage authentication compatibility and details-readable on the linked storage are an `Action:`.
 
@@ -122,8 +124,6 @@ Live or customer-practice checks a bundle can never settle: the status is fixed 
 | SEC-011 proxy configuration | never | never | always Needs Review |
 | SCALE-005 backup policy | never | never | always Needs Review |
 | SCALE-016 disaster recovery | never | never | always Needs Review |
-| GENAI-010 Agent Hub service account | never | never | always Needs Review |
-| GENAI-011 Agent Hub impersonation scope | never | never | always Needs Review |
 
 ## Stays with the model
 

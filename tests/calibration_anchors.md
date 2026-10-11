@@ -21,6 +21,7 @@ longer matches this table or when `calibrations.md` cites an id missing here; up
 | ARCH-012 | Functional Validation of Containerized Execution Across Recipe, Notebook, Webapp, and API |
 | ARCH-014 | Recommended Cluster Topology (Single Managed Cluster, Node Groups, Autoscaling) |
 | ARCH-015 | Appropriate Cluster Sizing |
+| ARCH-016 | Global Default Cluster and Default Execution Config Set (if Elastic AI used) |
 | GENAI-001 | Internal Code Environments for RAG, Document Extraction, PII Detection |
 | GENAI-002 | Hugging Face Local LLM Enablement (Conditional) |
 | GENAI-004 | AI Services Terms of Use Acceptance & Enablement |

@@ -22,6 +22,10 @@ sections:
   "advanced security options (dss":
     display: "Advanced Security Options"
     order: 5
+  # The same tab without Excel's 31-character truncation (the template's current name).
+  "advanced security options (dss)":
+    display: "Advanced Security Options"
+    order: 5
 
 # Case-insensitive substring aliases for locating the Summary sheet's
 # narrative blocks (see read_checklist.py:find_section_blocks). Only needed

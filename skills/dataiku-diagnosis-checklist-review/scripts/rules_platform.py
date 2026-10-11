@@ -344,4 +344,4 @@ def preferred_connections_and_engines(facts):
         names = sorted([*set_values, *engines])
         return verdict("Needs Review", f"non-blank preference(s): {', '.join(names)} (ask whether a use case justifies them)",
                        **{**set_values, **{f"engine:{k}": v for k, v in engines.items()}})
-    return verdict("Pass", "default connection, upload connection, storage formats and engine preferences are blank")
+    return verdict("Pass", "default connection, upload connection and engine preferences are blank; storage formats are blank or the DSS default list")

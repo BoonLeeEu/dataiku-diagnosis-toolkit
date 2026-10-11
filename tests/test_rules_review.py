@@ -9,7 +9,7 @@ sys.path.insert(0, str(REPO_ROOT / "skills" / "dataiku-diagnosis-checklist-revie
 import rules_review  # noqa: E402,F401
 import verdicts  # noqa: E402
 
-RULED = ["SEC-003", "SEC-008", "SEC-011", "SCALE-005", "SCALE-016", "GENAI-010", "GENAI-011"]
+RULED = ["SEC-003", "SEC-008", "SEC-011", "SCALE-005", "SCALE-016"]
 
 
 @pytest.mark.parametrize("check_id", RULED)

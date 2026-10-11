@@ -6,7 +6,7 @@ This repository can be installed as a local Codex plugin while keeping its Claud
 
 From this repository, run `codex plugin marketplace list`. Codex may already discover the existing `dataiku-local` marketplace from `.claude-plugin/marketplace.json`. If it does not, run `codex plugin marketplace add /absolute/path/to/this/repo`. Then run `codex plugin add dataiku-diagnosis-toolkit@dataiku-local` and start a new Codex session.
 
-The plugin launches one local stdio MCP server (the review generator). It needs `bash` and Python 3.10+. The Codex launcher mirrors only the server source into Codex's writable `PLUGIN_DATA` directory and runs the existing launch script there. The first launch installs dependencies in that directory.
+The plugin launches one local stdio MCP server (the review generator). It needs `bash` and Python 3.10+. If the system `python3` is older, set `DATAIKU_PYTHON` to a 3.10+ interpreter; if the review generator tools (`write_summary` etc.) are missing, read `launcher.log` in the plugin-data directory, and use the manual Summary fallback meanwhile. The Codex launcher mirrors only the server source into Codex's writable `PLUGIN_DATA` directory and runs the existing launch script there. The first launch installs dependencies in that directory.
 
 ## Branding template
 

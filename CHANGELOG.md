@@ -17,6 +17,18 @@ vendored components (`skills/dataiku-diagnosis-reader/`, `mcp-server-review-gene
 - `verdict-rules.md` moved from `skills/dataiku-diagnosis-checklist-review/references/` to `docs/verdict-rules.md`: it is a maintainer spec the model never reads. `tests/test_skill_boundaries.py` still scans it for reader-owned layout terms.
 - Checklist `SKILL.md` (230 to 202 lines): Verdicts is now its own step 2 (later steps renumbered; steps 4, 6 and 7 keep their numbers); removed repeated `notes` format, column lists, fact enumeration, reviewer format and status guidance; the evidence-planning step is one sentence; Deliver is a numbered list.
 
+## [0.38.7] - 2026-10-11
+
+### Changed
+
+- Launcher: `DATAIKU_PYTHON` names a Python >=3.10 to use when none is on `PATH` (e.g. Codex's bundled runtime); `/opt/homebrew/bin` and `/usr/local/bin` are searched explicitly; failures are also written to `launcher.log` (in `PLUGIN_DATA` under Codex) since hosts hide stderr.
+- ADVSEC reasons no longer read as if a disabled control were enabled: a miss now says `expected <control>, but <key>=false`.
+- SCALE-010's Pass reason says storage formats are blank or the DSS default list (the rule already counted the default as blank).
+- GENAI-010 and GENAI-011 now follow GENAI-009: Not Applicable when Agent Hub is not installed, Needs Review when it is.
+- Re-synced the vendored review generator to 0.10.2 (curated section name for `Advanced Security Options (DSS)`).
+- Bundled template's last tab renamed `Advanced Security Options (DSS)` (was the 31-character truncation with a trailing space, which some importers reject; old workbooks still match).
+- `calibrations.md`: scope notes for SCALE-008, GENAI-001, ARCH-007 and ARCH-016 (what a Pass does not establish).
+
 ## [0.38.6] - 2026-10-11
 
 ### Fixed

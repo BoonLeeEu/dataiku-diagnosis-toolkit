@@ -91,7 +91,8 @@ The status comes from the verdict. Quote its `deciding_values` and add only the 
   reference says how to count and get the window.
 - **SCALE-008:** state in `evidence_found` which of the five checks you used (RAM tier, 3x config folder, dead zone, the
   `OutOfMemoryError` count with its window); never assume a tier from RAM alone. `jek.xmx` and `fek.xmx` oversizing has no
-  threshold: `notes` only.
+  threshold: `notes` only. A Pass covers current sizing and the recent logs only: say in `notes` that historical JVM or native-memory
+  crash dumps are judged elsewhere and that Pass is not crash-free assurance.
 - **SCALE-009:** on Needs Review, ask whether the sizing is justified. A limit that sits in a different place than its name suggests
   still counts.
 - **SCALE-010:** name the non-blank values; call a non-blank engine preference the riskier one.
@@ -111,6 +112,7 @@ The status comes from the verdict. Quote its `deciding_values` and add only the 
   Manager snapshots).
 - **SCALE-016:** note what supports resilience in the bundle (external database, backups seen, a remote or HA topology); `Action:`
   hold a DR/HA discussion against the customer's RPO and RTO.
+- **GENAI-010, GENAI-011:** the rule gives Not Applicable when Agent Hub is not installed; keep that status.
 - **GENAI-011:** say whether Agent Hub is installed and which groups exist, never user names. The group running the Agent Hub web app and
   its impersonation allowed groups are not in a bundle: `Action:` check Administration > Security > Groups, that the allowed
   groups are limited to the users who should reach Agent Hub, with no broad group such as all users.
@@ -119,7 +121,10 @@ The status comes from the verdict. Quote its `deciding_values` and add only the 
 
 **Kubernetes and Spark**
 - **ARCH-007:** note the namespace field and value seen in `evidence_found` (a templated variable such as `${namespace}` needs
-  no tracing).
+  no tracing). A template alone does not prove per-user isolation: say in `notes` that variable resolution, creation policy and
+  the service account's permissions are checked separately.
+- **ARCH-016:** the rule passes on a default cluster alone. When the default execution config is absent, say in `notes` that readiness
+  for broad offloading is not established.
 - **ARCH-009, ARCH-012:** Not Applicable without a cluster attached; with one, Needs Review. ARCH-009: state the cluster kind and its API endpoint host if the reader
   publishes it; reachability in both directions (DSS to the API server, pods back to DSS) is an `Action:` live test. ARCH-012: name the configured execution configs and what is enabled (containerized recipes, notebooks, webapps, API services); `Action:` run a test in each.
 - **ARCH-008, ARCH-014, ARCH-015:** with a cluster attached the status is Needs Review: add an `Action:` to run a Spark recipe and
@@ -129,7 +134,7 @@ The status comes from the verdict. Quote its `deciding_values` and add only the 
   different names is a real gap: say so in `notes`.
 
 **GenAI**
-- **GENAI-001:** say which envs you saw.
+- **GENAI-001:** say which envs you saw. The status covers the default envs only, not installation, build health or document extraction defaults; say so in `notes`.
 - **GENAI-002:** Not Applicable without a cluster attached. With one the status is Needs Review: report what the bundle shows (whether
   the internal Hugging Face local code environment is installed, any GPU or accelerator hints in the cluster and execution configs;
   the model must not infer GPU nodes or compute capability) and add an `Action:` to confirm the GPU node group, NVIDIA compute

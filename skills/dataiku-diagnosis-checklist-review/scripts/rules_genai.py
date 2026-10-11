@@ -103,14 +103,24 @@ def cobuild_defaults(facts):
     return verdict("Needs Review", f"Cobuild default LLM(s) not set: {', '.join(unset)} (ask whether Cobuild is in use)", unset=unset)
 
 
-@rule("GENAI-009", "Agent Hub Deployment Required Permissions")
-def agent_hub_permissions(facts):
-    p = fact(facts, "plugins")
-    if not isinstance(p, dict):  # no plugin configuration directory in the bundle: nothing installed (the fixtures' policy)
-        return verdict("Not Applicable", "no plugins installed, so Agent Hub is not installed", agent_hub_installed=False)
-    if p["agent_hub_installed"]:
-        return verdict("Needs Review", "Agent Hub is installed; who may deploy it can't be verified from the bundle", agent_hub_installed=True)
-    return verdict("Not Applicable", "Agent Hub is not installed", agent_hub_installed=False)
+def _agent_hub_check(installed_reason: str):
+    """Not Applicable without Agent Hub; Needs Review when it is installed (what it asks is not in a bundle)."""
+    def decide(facts):
+        p = fact(facts, "plugins")
+        if not isinstance(p, dict):  # no plugin configuration directory in the bundle: nothing installed (the fixtures' policy)
+            return verdict("Not Applicable", "no plugins installed, so Agent Hub is not installed", agent_hub_installed=False)
+        if p["agent_hub_installed"]:
+            return verdict("Needs Review", f"Agent Hub is installed; {installed_reason}", agent_hub_installed=True)
+        return verdict("Not Applicable", "Agent Hub is not installed", agent_hub_installed=False)
+    return decide
+
+
+agent_hub_permissions = rule("GENAI-009", "Agent Hub Deployment Required Permissions")(
+    _agent_hub_check("who may deploy it can't be verified from the bundle"))
+rule("GENAI-010", "Use Service Account for Agent Hub Management")(
+    _agent_hub_check("the account type managing it is not in a bundle"))
+rule("GENAI-011", "Agent Hub WebApp Impersonation - Allowed Groups Scope")(
+    _agent_hub_check("the group running its web app and the impersonation scope are not in a bundle"))
 
 
 MIN_ASSISTANT_LOG_VERSION = (14, 7)

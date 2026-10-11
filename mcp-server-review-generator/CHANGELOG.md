@@ -7,6 +7,12 @@ adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.10.2] - 2026-10-11
+
+### Changed
+
+- `config/section_names.yaml`: curated entry for `Advanced Security Options (DSS)` (closing paren, no trailing space), so the checklist template's last tab can drop the truncated, space-terminated name some spreadsheet importers reject. The old key stays for existing workbooks.
+
 ## [0.10.1] - 2026-10-08
 
 Clean-up and efficiency pass; deck output is unchanged (golden decks identical).

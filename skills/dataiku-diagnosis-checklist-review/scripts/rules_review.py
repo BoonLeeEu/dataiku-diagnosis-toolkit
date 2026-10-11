@@ -23,7 +23,5 @@ for _id, _title, _why in (
     ("SEC-011", "Proxy Configuration Reviewed and Documented", "the proxy and its documentation live outside DSS"),
     ("SCALE-005", "Environment Backup Policy", "the backup policy lives outside DSS"),
     ("SCALE-016", "Disaster Recovery Strategy Discussion", "it is a conversation with the customer"),
-    ("GENAI-011", "Agent Hub WebApp Impersonation - Allowed Groups Scope", "the group running the Agent Hub web app and its impersonation scope are not in a bundle"),
-    ("GENAI-010", "Use Service Account for Agent Hub Management", "the account type managing Agent Hub is not in a bundle"),
 ):
     rule(_id, _title)(_always_needs_review(_why))

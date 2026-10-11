@@ -83,7 +83,7 @@ execs the real server. Install output goes to stderr, since MCP talks JSON-RPC o
 
 Practically: the first time the server starts after installing or updating the plugin, expect
 a delay of up to a minute or so while it installs; after that it starts instantly. Requires
-Python 3.10+ to be on `PATH` (or under `/opt/homebrew/bin` or `/usr/local/bin`),
+Python 3.10+ to be on `PATH` (or `DATAIKU_PYTHON` to point at one; failures are logged to `launcher.log`) (or under `/opt/homebrew/bin` or `/usr/local/bin`),
 and `bash` on `PATH` (macOS/Linux native; Windows needs WSL or Git Bash, since `orient.sh` is also
 a shell script). If the server fails to start, check the plugin's MCP server logs for the
 underlying `pip` error.
