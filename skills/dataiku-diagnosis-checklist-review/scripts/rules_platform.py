@@ -63,6 +63,11 @@ def cgroups_memory_limit(facts):
 def external_postgresql(facts):
     db = fact(facts, "internal_database")
     if not isinstance(db, dict):
+        entry = facts.get("internal_database")
+        searched = entry.get("searched") if isinstance(entry, dict) else None
+        if any("internalDatabase.connection" in str(s) for s in searched or []):  # the settings file was read; only the override is absent
+            return verdict("Needs Review", "no external internalDatabase.connection override in the bundle; DSS then uses its embedded H2 "
+                           "(an inference, not a stated value); confirm the runtime database")
         return _missing("internal database settings")
     kind, loopback = db.get("type", ABSENT), db.get("host_is_loopback", ABSENT)
     values = {"type": kind, "host_is_loopback": loopback}

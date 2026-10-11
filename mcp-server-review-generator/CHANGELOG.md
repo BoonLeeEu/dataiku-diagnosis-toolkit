@@ -7,6 +7,13 @@ adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.10.3] - 2026-10-11
+
+### Changed
+
+- `write_summary`: finding rows wrap (Section, Title, Key point) with a row height sized to the wrapped text, and each recommendation is merged across A:E, wrapped and sized, so long text is no longer clipped or spilling. The round-trip check still re-reads the sheet as the deck reader does.
+- v2 risk slide: the root-cause card heading is `One root cause` only when the narrative gives `linked_label`; otherwise it reads `Linked fixes`.
+
 ## [0.10.2] - 2026-10-11
 
 ### Changed

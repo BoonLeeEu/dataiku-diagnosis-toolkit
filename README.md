@@ -100,7 +100,7 @@ be installed on the host. The host needs only:
 If any of these is missing the server does not start and its tools (`write_summary`, `analyze_checklist`,
 `build_platform_review_deck`, `validate_deck`) do not appear. The launcher writes its own failures (no suitable
 Python) to `launcher.log`; `pip` errors appear only in the host's MCP server log. The review skill's manual
-Summary fallback still works without the server, but the agent must then run the scripts with a Python that has
+Summary fallback still works without the server (`run_step.py verdicts` and `verify` re-run themselves under the plugin's virtualenv Python, or `DATAIKU_PYTHON`, when the default Python lacks openpyxl), but the agent must then run the scripts with a Python that has
 openpyxl and PyYAML.
 
 If you'd rather not wait on the lazy build, you can still run the setup manually up front:

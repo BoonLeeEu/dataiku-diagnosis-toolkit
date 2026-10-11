@@ -365,7 +365,7 @@ def risk1_slide(d, a, narr):
     if r1.get("linked_label") or ids:
         card(s, 0.39 + 2.45, 1.2 + 2 * 1.2, 2.35, 1.1, fill=DK, line=None, name="Root cause card")
         tb(s, 0.39 + 2.45 + 0.15, 1.2 + 2 * 1.2 + 0.1, 2.05, 0.9,
-           [P("One root cause", 10, True, MINT, after=3),
+           [P("One root cause" if r1.get("linked_label") else "Linked fixes", 10, True, MINT, after=3),
             P(r1.get("linked_label") or f"{len(ids)} checks, one sequence of fixes.", 10, False, WHITE, after=3)] +
            ([P(", ".join(ids), 8, False, MINT)] if ids else []), "m", name="Root cause text")
     card(s, 5.45, 1.2, 4.15, 1.05, fill="FDEAEA", line="E8A0A0", name="Risk card")

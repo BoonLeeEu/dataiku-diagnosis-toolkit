@@ -145,3 +145,17 @@ def test_tab_name_with_trailing_whitespace_round_trips(checklist_factory, sectio
     run(path, section_config, key_points={"ADVSEC-001": "Fails."})
     data = read_checklist.read_checklist(path, section_config)
     assert data.per_section_breakdown[0]["counts"]["Fail"] == 1
+
+
+def test_long_text_wraps_and_recommendations_are_merged_with_a_row_height(checklist_factory, section_config):
+    path = checklist_factory()
+    long_rec = "Rotate the stored credential, then " + "move it to a secrets store and document the owner. " * 6
+    write_summary.write_summary(path, reviewer="A. Reviewer", bundle="b", key_points=KEY_POINTS,
+                                recommendations=[long_rec], config=section_config)
+    ws = openpyxl.load_workbook(path)["Summary"]
+    rec_row = next(r for r in range(1, ws.max_row + 1) if str(ws.cell(r, 1).value).startswith("1. Rotate"))
+    assert any(str(rng).startswith(f"A{rec_row}:") for rng in ws.merged_cells.ranges)
+    assert ws.cell(rec_row, 1).alignment.wrap_text and ws.row_dimensions[rec_row].height > 15
+    finding = next(r for r in range(1, ws.max_row + 1) if ws.cell(r, 1).value == "ARCH-002")
+    assert ws.cell(finding, 3).alignment.wrap_text and ws.cell(finding, 2).alignment.wrap_text
+    assert read_checklist.read_checklist(path, section_config).recommendations == ["1. " + long_rec.strip()]

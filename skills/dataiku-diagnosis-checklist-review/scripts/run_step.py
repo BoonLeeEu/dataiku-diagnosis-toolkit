@@ -21,13 +21,15 @@ exit status 0; the saved `<stem>_facts.json` and a fresh `facts.py` run both mat
 output is genuine and unedited); every ruled row's workbook status equals its verdict (each difference is named);
 the checklist's first sheet is `Summary` and its Total equals the checklist's row count (the Summary was
 written after the last edit); with `--deck`, the narrative and the deck file exist. Rows with no rule are not
-judged. Python 3 stdlib plus openpyxl (already a plugin dependency).
+judged. Python 3 stdlib plus openpyxl (already a plugin dependency). `verdicts` and `verify` need openpyxl: when the
+interpreter lacks it, they re-run themselves with the plugin's own virtualenv Python (see `venv_pythons`).
 """
 from __future__ import annotations
 
 import argparse
 import hashlib
 import json
+import os
 import re
 import subprocess
 import sys
@@ -41,6 +43,40 @@ import rules_genai  # noqa: E402,F401
 import rules_k8s  # noqa: E402,F401
 import rules_review  # noqa: E402,F401
 import rules_security  # noqa: E402,F401
+
+VENV_PYTHON = "mcp-server-review-generator/.venv/bin/python3"
+REEXEC_ENV = "DATAIKU_RUN_STEP_REEXEC"
+
+
+def venv_pythons(home: Path | None = None) -> list[Path]:
+    """Candidate interpreters that have the plugin's dependencies (openpyxl), best first: DATAIKU_PYTHON, the venv beside this
+    plugin (Claude Code), the venv in PLUGIN_DATA, then the newest venv under Codex's plugin-data directory."""
+    home = home or Path.home()
+    found: list[Path] = []
+    if os.environ.get("DATAIKU_PYTHON"):
+        found.append(Path(os.environ["DATAIKU_PYTHON"]))
+    found.append(Path(__file__).resolve().parents[3] / VENV_PYTHON)
+    if os.environ.get("PLUGIN_DATA"):
+        found.append(Path(os.environ["PLUGIN_DATA"]) / "review-generator" / VENV_PYTHON)
+    codex = sorted((home / ".codex" / "plugins" / "data").glob("*/*/review-generator/" + VENV_PYTHON),
+                   key=lambda q: q.stat().st_mtime, reverse=True)
+    return [q for q in found + codex if q.is_file()]
+
+
+def ensure_openpyxl() -> None:
+    """Return when openpyxl imports; otherwise re-run this command under the plugin's virtualenv Python, or exit with how to fix it."""
+    try:
+        import openpyxl  # noqa: F401
+        return
+    except ImportError:
+        pass
+    pythons = venv_pythons()
+    if pythons and not os.environ.get(REEXEC_ENV):
+        os.environ[REEXEC_ENV] = "1"
+        os.execv(str(pythons[0]), [str(pythons[0]), *sys.argv])
+    sys.exit("run_step.py: openpyxl is not installed for this Python and no plugin virtualenv was found; run it with the plugin's "
+             "mcp-server-review-generator/.venv/bin/python3, or set DATAIKU_PYTHON to a Python 3.10+ that has openpyxl")
+
 
 READER = Path(__file__).resolve().parents[2] / "dataiku-diagnosis-reader"
 READER_STEPS = {"orient": ["bash", str(READER / "scripts" / "orient.sh")],
@@ -233,6 +269,8 @@ def main() -> int:
     if not Path(a.bundle_root).is_dir():
         sys.exit(f"run_step.py: bundle_root not found: {a.bundle_root}")
     manifest = Path(a.manifest)
+    if a.cmd != "run":
+        ensure_openpyxl()
     if a.cmd == "run":
         return run(a.step, a.bundle_root, manifest)
     if a.cmd == "verdicts":

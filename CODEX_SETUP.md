@@ -19,7 +19,7 @@ For the MCP server, the host needs:
 
 If one is missing the server does not start and `write_summary`, `analyze_checklist`, `build_platform_review_deck` and `validate_deck` do not appear in the session. The launcher writes a missing-Python failure to `launcher.log` in the plugin-data directory; `pip` errors appear only in Codex's MCP server log.
 
-The checklist review also runs `scripts/run_step.py` in Codex's shell. Its workbook steps require `openpyxl` in the Python interpreter used there, even when the MCP server is available. Use a Python 3.10+ interpreter with `openpyxl`, such as the server virtualenv at `$PLUGIN_DATA/review-generator/mcp-server-review-generator/.venv/bin/python3` when that path is available to the shell. The manual Summary fallback also needs a Python with `openpyxl` for workbook edits.
+The checklist review also runs `scripts/run_step.py` in Codex's shell. Its workbook steps require `openpyxl` in the Python interpreter used there, even when the MCP server is available. `run_step.py verdicts` and `verify` now re-run themselves under the plugin's virtualenv Python when the default one lacks `openpyxl` (looking at `DATAIKU_PYTHON`, the venv beside the plugin, `PLUGIN_DATA` and Codex's plugin-data directory). For other scripts, use a Python 3.10+ interpreter with `openpyxl`, such as the server virtualenv at `$PLUGIN_DATA/review-generator/mcp-server-review-generator/.venv/bin/python3` when that path is available to the shell. The manual Summary fallback also needs a Python with `openpyxl` for workbook edits.
 
 ## Branding template
 

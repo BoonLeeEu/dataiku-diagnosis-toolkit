@@ -52,7 +52,7 @@ DENY), x-content-type-options (nosniff), x-xss-protection (set and not 0), hsts-
 | ARCH-001 design/automation separation | never | never | Needs Review for every node type (design, automation, other) and when the node type is missing: one bundle never shows the other node |
 | ARCH-004 SSD | every data-directory disk non-rotational | a rotational disk, or a sanity-check code naming the disk type (even when disks can't be read) | Needs Review: undeterminable. Undecided (model reads the text) only with facts that carry no message codes |
 | SEC-004 cgroups memory | limit within 10% of the RAM tier's target (either side) | cgroups disabled | Needs Review: limit 80% of RAM or more (checked first); more than 10% from target; enabled with no limit; settings or host memory missing |
-| SCALE-001 PostgreSQL | PostgreSQL, local or remote | any other database | |
+| SCALE-001 PostgreSQL | PostgreSQL, local or remote | any other database | Needs Review when the database or host can't be read. With no external `internalDatabase.connection` override the reason says DSS then uses its embedded H2 (an inference) |
 | SCALE-002 metastore | Hive on a Hadoop estate; DSS-internal with none | never | Glue, estate mismatch, unknown flavor = Needs Review |
 | SCALE-012 cloud object storage | every S3, Azure or GCS connection readable by someone and (where the reader found it) an HDFS interface set | none of them set | Partial: some. Not Applicable: no such connection. Needs Review: readable-by unknown |
 | SCALE-013 Snowflake | every Snowflake connection has fast-write set (and Spark native integration and UDF where found) | none set | Partial: some. Not Applicable: no Snowflake connection. Needs Review: fast-write setting not found |

@@ -137,3 +137,42 @@ def test_plugin_scripts_with_modern_annotations_defer_them():
            if re.search(r"\) -> [^\n]*\| None|: [\w\[\], .]*\| None", p.read_text())
            and "from __future__ import annotations" not in p.read_text()]
     assert not bad, bad
+
+
+def _run_step_module():
+    sys.path.insert(0, str(SCRIPT.parent))
+    import run_step
+    return run_step
+
+
+def _fake_python(path):
+    path.parent.mkdir(parents=True)
+    path.write_text("")
+    return path
+
+
+def test_venv_pythons_search_order(tmp_path, monkeypatch):
+    rs = _run_step_module()
+    own = _fake_python(tmp_path / "own" / "python3")
+    data = _fake_python(tmp_path / "data" / "review-generator" / rs.VENV_PYTHON)
+    old = _fake_python(tmp_path / "home" / ".codex/plugins/data/m/aaa/review-generator" / rs.VENV_PYTHON)
+    new = _fake_python(tmp_path / "home" / ".codex/plugins/data/m/bbb/review-generator" / rs.VENV_PYTHON)
+    import os
+    os.utime(old, (1, 1))
+    monkeypatch.setenv("DATAIKU_PYTHON", str(own))
+    monkeypatch.setenv("PLUGIN_DATA", str(tmp_path / "data"))
+    found = rs.venv_pythons(home=tmp_path / "home")
+    assert [p for p in found if str(p).startswith(str(tmp_path))] == [own, data, new, old]
+
+
+def test_missing_openpyxl_without_a_venv_exits_with_the_fix(monkeypatch):
+    rs = _run_step_module()
+    real = __import__
+    monkeypatch.setattr("builtins.__import__", lambda n, *a, **k: (_ for _ in ()).throw(ImportError()) if n == "openpyxl" else real(n, *a, **k))
+    monkeypatch.setattr(rs, "venv_pythons", lambda home=None: [])
+    try:
+        rs.ensure_openpyxl()
+    except SystemExit as e:
+        assert "DATAIKU_PYTHON" in str(e.code) and "openpyxl" in str(e.code)
+    else:
+        raise AssertionError("expected SystemExit")

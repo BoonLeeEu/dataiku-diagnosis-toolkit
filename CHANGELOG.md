@@ -10,6 +10,14 @@ vendored components (`skills/dataiku-diagnosis-reader/`, `mcp-server-review-gene
 
 ## [Unreleased]
 
+## [0.38.9] - 2026-10-11
+
+### Changed
+
+- `run_step.py verdicts` and `verify` re-run themselves under the plugin's own virtualenv Python (`DATAIKU_PYTHON`, the venv beside the plugin, `PLUGIN_DATA`, or Codex's plugin-data directory) when the default Python lacks openpyxl, and otherwise exit with one line saying how to fix it.
+- SCALE-001's reason now says when only the external `internalDatabase.connection` override is absent (DSS then uses its embedded H2, an inference) instead of "settings missing from the bundle"; status unchanged.
+- Re-synced the vendored review generator to 0.10.3: `write_summary` wraps and sizes long text and merges recommendation rows; the v2 risk slide says `One root cause` only when the narrative gives `linked_label`, else `Linked fixes`.
+
 ### Changed
 
 - Re-synced the vendored review generator to 0.10.1 (Summary sheet read once, v1 no longer reads the checklist twice, dead code removed; deck output unchanged).

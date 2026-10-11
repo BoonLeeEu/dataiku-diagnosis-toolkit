@@ -15,11 +15,12 @@ be reused for any other column-A cell on the sheet.
 
 import logging
 import os
+import textwrap
 from datetime import date
 from pathlib import Path
 
 import openpyxl
-from openpyxl.styles import Font, PatternFill
+from openpyxl.styles import Alignment, Font, PatternFill
 
 import common
 import read_checklist
@@ -53,6 +54,14 @@ STATUS_FILLS = {
     "Not Applicable": "FFD9D9D9",
 }
 COLUMN_WIDTHS = {"A": 46, "B": 20, "C": 44, "D": 16, "E": 90, "F": 16}
+WRAP = Alignment(wrap_text=True, vertical="top")
+LINE_HEIGHT = 15  # points per wrapped line at the default 11pt font
+RECOMMENDATION_LAST_COL = "E"  # recommendations are merged across A:E so a long action wraps instead of spilling
+
+
+def _wrapped_lines(text, width) -> int:
+    """Rows a cell needs when `text` wraps in a column `width` characters wide (an estimate; Excel does not auto-size merged cells)."""
+    return max(1, len(textwrap.wrap(str(text), width=max(int(width) - 1, 1), break_long_words=True)))
 
 
 
@@ -148,16 +157,22 @@ def _validate_inputs(items_by_sheet, key_points, recommendations, reviewer, bund
 def _write_sheet(ws, *, items_by_sheet, key_points, recommendations, metadata):
     row = 1
 
-    def put(values, font=None, fill=None, status_col=None):
+    def put(values, font=None, fill=None, status_col=None, wrap=False):
         nonlocal row
+        lines = 1
         for c, v in enumerate(values, start=1):
             cell = ws.cell(row=row, column=c, value=v)
+            if wrap:
+                cell.alignment = WRAP
+                lines = max(lines, _wrapped_lines(v, COLUMN_WIDTHS["ABCDEF"[c - 1]]))
             if font is not None:
                 cell.font = font
             if fill is not None:
                 cell.fill = fill
             if status_col == c and v in STATUS_FILLS:
                 cell.fill = PatternFill("solid", fgColor=STATUS_FILLS[v])
+        if wrap and lines > 1:
+            ws.row_dimensions[row].height = LINE_HEIGHT * lines
         row += 1
 
     def block_header(text):
@@ -201,7 +216,7 @@ def _write_sheet(ws, *, items_by_sheet, key_points, recommendations, metadata):
         put(FINDING_COLUMNS, font=TABLE_HEADER_FONT, fill=TABLE_HEADER_FILL)
         for finding in _finding_rows(items_by_sheet, statuses, key_points):
             finding[4] = str(finding[4]).strip()
-            put(finding, status_col=4)
+            put(finding, status_col=4, wrap=True)
         blank()
 
     block_header(HEADERS["recommendations"])
@@ -211,7 +226,13 @@ def _write_sheet(ws, *, items_by_sheet, key_points, recommendations, metadata):
         if not text:
             continue
         n += 1
-        put([f"{n}. {text}"])
+        text = f"{n}. {text}"
+        cell = ws.cell(row=row, column=1, value=text)
+        cell.alignment = WRAP
+        ws.merge_cells(f"A{row}:{RECOMMENDATION_LAST_COL}{row}")
+        width = sum(COLUMN_WIDTHS[c] for c in "ABCDE")
+        ws.row_dimensions[row].height = LINE_HEIGHT * _wrapped_lines(text, width)
+        row += 1
 
     for col, width in COLUMN_WIDTHS.items():
         ws.column_dimensions[col].width = width

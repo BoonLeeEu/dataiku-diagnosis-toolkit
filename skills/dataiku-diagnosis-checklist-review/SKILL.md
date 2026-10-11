@@ -10,7 +10,9 @@ columns (`validation_status`, `evidence_found`, `notes`, `validated_at`, `valida
 bundle's actual contents and write the results back into the spreadsheet, plus add/update a Summary tab.
 
 **Prerequisite:** the scripts need Python >=3.10. If `python3 --version` is older, run them with a newer
-interpreter (e.g. `python3.12`, or the review generator's `.venv/bin/python3`).
+interpreter (e.g. `python3.12`, or the review generator's `.venv/bin/python3`). `run_step.py verdicts` and `verify` need
+openpyxl and re-run themselves under the plugin's own virtualenv when the default Python lacks it; if it can't find one,
+set `DATAIKU_PYTHON` to a Python 3.10+ that has openpyxl.
 
 ## Reference files (in this skill's `references/` directory)
 

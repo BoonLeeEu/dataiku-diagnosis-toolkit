@@ -90,6 +90,14 @@ def test_scale001_database(db, expected):
     assert run("SCALE-001", facts(internal_database=db)) == expected
 
 
+def test_scale001_names_the_missing_override_not_missing_settings():
+    def reason(searched):
+        doc = {"facts": {"internal_database": {"value": "ABSENT", "searched": searched}}}
+        return verdicts.compute(doc, [{"id": "SCALE-001", "title": verdicts.RULES["SCALE-001"][0]}])["verdicts"][0]["reason"]
+    assert "embedded H2" in reason(["config/general-settings.json: internalDatabase.connection"])
+    assert reason(["config/general-settings.json"]) == "internal database settings missing from the bundle"
+
+
 @pytest.mark.parametrize("sc,expected", [
     ({"present": True, "empty": False, "messages": 3}, "Pass"),
     ({"present": True, "empty": True, "messages": 0}, "Fail"),
