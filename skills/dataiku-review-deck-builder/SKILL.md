@@ -13,6 +13,10 @@ suggest running that skill first — this one expects a checklist that already h
 
 ## 0. Tools
 
+First run `bash ../../scripts/preflight.sh` (from this skill's directory; no Python needed). If its `TIER=` is not
+`FULL`, stop: tell the user the deck needs Python 3.10+ on the host, give them its `fix=` line, and offer the
+checklist workbook as the deliverable. Do not search for the generator tools or retry.
+
 `write_summary`, `analyze_checklist`, `build_platform_review_deck` and `validate_deck` come from the
 bundled `dataiku-review-generator` MCP server. If they are deferred, load them with your host's tool
 discovery (in Claude Code, `ToolSearch` with `select:<name>,...`). Names may carry a server prefix.

@@ -10,6 +10,12 @@ vendored components (`skills/dataiku-diagnosis-reader/`, `mcp-server-review-gene
 
 ## [Unreleased]
 
+## [0.38.11] - 2026-10-12
+
+### Added
+
+- `scripts/preflight.sh`: pure-bash host check that prints `TIER=FULL`, `SPREADSHEET` or `FACTS_ONLY` (with a `fix=` hint). The checklist-review, deck-builder and Codex workflow skills run it first and limit their output to the tier, so a host without Python 3.10+ gets the workbook at most and is told why instead of a missing deck tool.
+
 ## [0.38.10] - 2026-10-12
 
 ### Fixed

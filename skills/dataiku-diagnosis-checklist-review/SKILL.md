@@ -9,7 +9,7 @@ Given (1) a Dataiku DSS diagnosis bundle directory and (2) a checklist spreadshe
 columns (`validation_status`, `evidence_found`, `notes`, `validated_at`, `validated_by`), evaluate every row against the
 bundle's actual contents and write the results back into the spreadsheet, plus add/update a Summary tab.
 
-**Prerequisite:** the scripts need Python >=3.10. If `python3 --version` is older, run them with a newer
+**Prerequisite:** the scripts need Python >=3.10 for the deck and MCP tools (`run_step.py` itself tolerates older ones). If `python3 --version` is older, run them with a newer
 interpreter (e.g. `python3.12`, or the review generator's `.venv/bin/python3`). `run_step.py verdicts` and `verify` need
 openpyxl and re-run themselves under the plugin's own virtualenv when the default Python lacks it; if it can't find one,
 set `DATAIKU_PYTHON` to a Python 3.10+ that has openpyxl.
@@ -24,6 +24,15 @@ set `DATAIKU_PYTHON` to a Python 3.10+ that has openpyxl.
 - `linked-computer.md` — device staging and commit-verify loop. Read only on a linked computer (step 0).
 
 ## 0. Inputs, access and tools
+
+- **Host preflight (first).** Run `bash <plugin root>/scripts/preflight.sh` (from this skill's directory that is
+  `../../scripts/preflight.sh`; it needs no Python) and read its `TIER=` line. Tell the user the tier and any
+  `fix=` line in one sentence, then limit the output to it:
+  - `FULL`: the workbook, Summary and, on request, the deck.
+  - `SPREADSHEET`: the workbook (`run_step.py verdicts` / `verify` with the Python it names) and the manual
+    Summary. No deck and no review-generator tools; say so rather than searching for them.
+  - `FACTS_ONLY`: orient and facts findings in the chat only. No workbook, Summary or deck.
+  If you cannot run the script, continue as `FULL` and fall back when a step fails for lack of Python.
 
 - If the user hasn't given both paths, ask for the diagnosis bundle path and the checklist file
   path, nothing else up front. Start once you have both.

@@ -103,6 +103,10 @@ Python) to `launcher.log`; `pip` errors appear only in the host's MCP server log
 Summary fallback still works without the server (`run_step.py verdicts` and `verify` re-run themselves under the plugin's virtualenv Python, or `DATAIKU_PYTHON`, when the default Python lacks openpyxl), but the agent must then run the scripts with a Python that has
 openpyxl and PyYAML.
 
+**Preflight.** `scripts/preflight.sh` (pure bash) prints `TIER=FULL` (workbook, Summary, deck), `SPREADSHEET`
+(some Python has openpyxl, but no 3.10+, so workbook only) or `FACTS_ONLY` (findings in chat only), with a `fix=` hint.
+The review and deck skills run it first and limit their output to the tier.
+
 If you'd rather not wait on the lazy build, you can still run the setup manually up front:
 
 ```sh
