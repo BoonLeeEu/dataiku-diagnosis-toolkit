@@ -310,3 +310,30 @@ def test_build_result_reports_what_the_deck_rendered(analysis):
     assert build_deck_v2.rendered_quick_wins(a, narr) == ["SCALE-009"]
     assert build_deck_v2.rendered_owner_groups(a, narr) == {"Ops": ["X-1"]}
     assert build_deck_v2.rendered_owner_groups(a, {}) == {o: ids for o, ids in a.owners}
+
+
+def test_narrative_tile_number_too_long_for_tile(analysis):
+    _, a = analysis
+    with pytest.raises(narrative.NarrativeError, match="won't fit its tile"):
+        narrative.validate({"risk1": {"tiles": [{"number": "123456789", "label": "x", "id": "SEC-001"}]}}, a)
+
+
+def test_narrative_grouped_owner_id_names_the_rule(analysis):
+    _, a = analysis
+    bad = {"owners": {"groups": [{"owner": "X", "asks": [{"id": "ARCH-001 / ARCH-002", "ask": "a"}]}]}}
+    with pytest.raises(narrative.NarrativeError, match="one checklist id per entry"):
+        narrative.validate(bad, a)
+
+
+def test_narrative_owner_with_too_many_asks(analysis):
+    _, a = analysis
+    asks = [{"id": "ARCH-001", "ask": "a"}] * (narrative.MAX_OWNER_ASKS + 1)
+    with pytest.raises(narrative.NarrativeError, match="don't fit one card"):
+        narrative.validate({"owners": {"groups": [{"owner": "X", "asks": asks}]}}, a)
+
+
+def test_fit_pt_shrinks_long_figures():
+    from build_deck_v2 import fit_pt
+    assert fit_pt("98", 0.95, 24, 14) == 24
+    assert 14 <= fit_pt("166847", 0.95, 24, 14) < 24
+    assert fit_pt("12345678", 0.95, 24, 14) == 14

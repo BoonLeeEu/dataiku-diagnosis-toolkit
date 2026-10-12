@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "dataiku-diagnosis-toolkit",
-  "version": "0.38.9",
+  "version": "0.38.10",
   "description": "Review Dataiku DSS diagnosis bundles against checklists and generate Platform Review decks.",
   "author": {
     "name": "Boon Lee Eu"

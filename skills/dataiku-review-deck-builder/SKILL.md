@@ -76,8 +76,10 @@ derived from the slide's text-box sizes, as ceilings (characters, spaces include
 | `highlights` | 170 |
 | `risk1.risk` | 130 |
 | `risk1.fix[].text` | 35, one line; at most 5 steps |
+| `risk1.tiles[].number` | 8 characters; the figure shrinks to fit (use a short one, not a six-digit log total) |
 | `risk1.tiles[].label` | 30; `note` 60 (the id is prepended) |
 | `roadmap.*[].action` | 55; at most 4 items per column (5 only if every action fits one line, about 30) |
+| `owners.groups[].asks` | one checklist id per ask (never `A-1 / A-2`); at most 14 per owner, and from 6 up each shows on one line |
 | `owners.groups[].asks[].ask` | 40 when the owner has up to 5 asks, else 20 (one line); owner `notes` 100 |
 
 Put the detail in the checklist's `notes` and `evidence_found`, which the deck's appendix carries, not in

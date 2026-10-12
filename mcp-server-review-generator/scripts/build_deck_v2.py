@@ -249,6 +249,11 @@ def clip(text, n):
     return text if len(text) <= n else text[:n - 3].rsplit(" ", 1)[0] + "..."
 
 
+def fit_pt(text, width_in, max_pt, min_pt, ratio=0.62):
+    """Largest size in [min_pt, max_pt] at which a single line of bold text fits the width."""
+    return int(max(min_pt, min(max_pt, width_in * 72 / (ratio * max(1, len(text))))))
+
+
 def est_lines(text, width_in, size_pt):
     chars = max(1, int(width_in * 72 / (size_pt * 0.55)))
     return sum(max(1, math.ceil(len(l) / chars)) for l in (text or " ").split("\n"))
@@ -357,7 +362,7 @@ def risk1_slide(d, a, narr):
     for i, t in enumerate(tiles):
         cx = 0.39 + (i % 2) * 2.45; cy = 1.2 + (i // 2) * 1.2
         card(s, cx, cy, 2.35, 1.1, name=f"Evidence tile {i + 1}")
-        tb(s, cx + 0.15, cy + 0.08, 0.95, 0.55, [P(str(t["number"]), 24, True, RED, font="Spectral")], "m", name=f"Evidence number {i + 1}")
+        tb(s, cx + 0.15, cy + 0.08, 0.95, 0.55, [P(str(t["number"]), fit_pt(str(t["number"]), 0.95, 24, 14), True, RED, font="Spectral")], "m", name=f"Evidence number {i + 1}")
         tb(s, cx + 1.05, cy + 0.1, 1.2, 0.5, [P(t["label"], 9.5, True, DK)], "m", name=f"Evidence label {i + 1}")
         note = f"{t['id']}: {t['note']}" if t.get("id") and t.get("note") else (t.get("id") or t.get("note", ""))
         tb(s, cx + 0.15, cy + 0.68, 2.1, 0.4, [P(note, 8.5, False, GREY)], name=f"Evidence note {i + 1}")
@@ -529,8 +534,14 @@ def owners_slide(d, a, narr):
         step = min(0.54, 2.7 / len(grp["asks"]))
         y = 1.72
         for ask in grp["asks"]:
-            tb(s, cx + 0.14, y, w - 0.25, 0.2, [P(ask["id"], 8, True, "2F4C9E")], name=f"Owner item id {ask['id']}")
-            tb(s, cx + 0.14, y + 0.17, w - 0.25, 0.3, [P(ask["ask"], 9)], name=f"Owner item ask {ask['id']}")
+            if step >= 0.47:  # roomy: id above, ask below
+                tb(s, cx + 0.14, y, w - 0.25, 0.2, [P(ask["id"], 8, True, "2F4C9E")], name=f"Owner item id {ask['id']}")
+                tb(s, cx + 0.14, y + 0.17, w - 0.25, 0.3, [P(ask["ask"], 9)], name=f"Owner item ask {ask['id']}")
+            else:  # crowded: one line per ask, so rows can't overlap
+                room = max(8, int((w - 0.25) * 72 / (8 * 0.55)) - len(ask["id"]) - 2)
+                tb(s, cx + 0.14, y, w - 0.25, step, [P([(ask["id"] + "  ", {"bold": True, "color": "2F4C9E"}),
+                                                       (clip(ask["ask"], room), {})], 8)],
+                   name=f"Owner item {ask['id']}")
             y += step
         if notes.get(grp["owner"]):
             tb(s, cx + 0.14, 4.47, w - 0.25, 0.5, [P(notes[grp["owner"]], 8, False, GREY)], name=f"Owner note {i + 1}")

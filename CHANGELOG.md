@@ -10,6 +10,16 @@ vendored components (`skills/dataiku-diagnosis-reader/`, `mcp-server-review-gene
 
 ## [Unreleased]
 
+## [0.38.10] - 2026-10-12
+
+### Fixed
+
+- Deck: large Risk 1 tile figures no longer wrap over their labels, and an owner card with many asks no longer overlaps its rows (re-synced review generator 0.10.4). Over-long tile figures, grouped ids and more than 14 asks per owner now fail with a message that says what to change.
+
+### Changed
+
+- `dataiku-review-deck-builder` length budgets list the tile figure and per-owner ask limits.
+
 ## [0.38.9] - 2026-10-11
 
 ### Changed

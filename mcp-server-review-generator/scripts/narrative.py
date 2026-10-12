@@ -169,6 +169,8 @@ def validate(narr: dict, a: Analysis):
 
     def check_cited(cid, where, allowed=("Fail", "Partial", "Needs Review")):
         row = a.rows.get(cid)
+        if row is None and isinstance(cid, str) and re.search(r"[\s,/;&]", cid.strip()):
+            raise NarrativeError(f"{where}: {cid!r} groups several ids; give one checklist id per entry.")
         if row is None:
             raise NarrativeError(f"{where}: {cid} is not in any checklist section sheet.")
         if row.status in allowed or (row.status == "Pass" and cid in caveats):
@@ -183,6 +185,10 @@ def validate(narr: dict, a: Analysis):
         cid = t.get("id")
         row = check_cited(cid, f"risk1.tiles[{i}]") if cid else None
         num = str(t.get("number", ""))
+        if len(num) > MAX_TILE_NUMBER:
+            raise NarrativeError(
+                f"risk1.tiles[{i}]: figure {num!r} is longer than {MAX_TILE_NUMBER} characters and won't fit its "
+                f"tile; use a smaller figure from the row, or the figure that fits (e.g. a count, not a log total).")
         if row and not _traces(num, row.raw_text):
             raise NarrativeError(
                 f"risk1.tiles[{i}]: figure {num!r} does not appear in {cid}'s notes or evidence "
@@ -206,6 +212,11 @@ def validate(narr: dict, a: Analysis):
             for ask in g.get("asks", []):
                 row = check_cited(ask.get("id"), f"owners[{g.get('owner')}]", ("Needs Review",))
                 seen.append(row.id)
+        for g in groups:
+            if len(g.get("asks", [])) > MAX_OWNER_ASKS:
+                raise NarrativeError(
+                    f"owners[{g.get('owner')}]: {len(g['asks'])} asks don't fit one card (max {MAX_OWNER_ASKS}); "
+                    f"move some to another owner.")
         nr = {r.id for r in a.by_status("Needs Review")}
         if len(seen) != len(set(seen)) or set(seen) != nr:
             missing, extra = sorted(nr - set(seen)), sorted(set(seen) - nr)
@@ -261,6 +272,9 @@ MISSING_WARNING = (
     "checklist (see analyze_checklist) and rebuild; only a plain script run may ship without one."
 )
 
+MAX_TILE_NUMBER = 8   # characters; build_deck_v2 shrinks the figure to fit, down to 14pt
+MAX_OWNER_ASKS = 14   # rows one owner card can hold
+
 RULES = [
     "Write from this checklist's rows only; never reuse another customer's text.",
     "takeaways: exactly 3 (tones good, risk, win), or omit the key.",
@@ -268,6 +282,8 @@ RULES = [
     "na_groups must cover every Not Applicable id exactly once (not_applicable below).",
     "quick_wins rows must be Fail items; risk2.table Fail or Partial; other citations Fail, Partial or Needs Review.",
     "A Pass item may be cited only if listed under caveats.",
+    "owners asks: one checklist id per ask (no 'A-1 / A-2'); at most 14 asks per owner.",
+    "risk1 tile numbers: at most 8 characters.",
     "Every figure on a risk1 tile must appear in the cited row's notes or evidence_found.",
     "Text fields (positives, action, body, ...) are single strings, not lists; only ids/ids-like fields take lists.",
     "roadmap effort is S, M or L. snapshot has at most 8 cards, each state ok, watch or neutral (a status dot "

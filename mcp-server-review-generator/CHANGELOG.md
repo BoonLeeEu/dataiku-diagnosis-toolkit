@@ -7,6 +7,21 @@ adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.10.4] - 2026-10-12
+
+### Fixed
+
+- v2 Risk 1 tiles: the figure is sized to its box (24pt down to 14pt) instead of wrapping over the label. `risk1.tiles[].number` is capped at 8 characters, with an error that says so.
+- v2 owners slide: a card with many asks switches to one line per ask, so rows no longer overlap. An owner may hold at most 14 asks; more is rejected with a message to redistribute.
+
+### Changed
+
+- A grouped owner or cited id (`ARCH-001 / ARCH-002`) is rejected with "give one checklist id per entry" instead of "not in any checklist section sheet". The scaffold rules now state the one-id and size limits.
+
+### Known issues
+
+- `validate_deck` is still structural only; it does not detect text overflow.
+
 ## [0.10.3] - 2026-10-11
 
 ### Changed
