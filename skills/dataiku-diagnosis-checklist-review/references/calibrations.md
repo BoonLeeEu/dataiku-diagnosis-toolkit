@@ -68,6 +68,8 @@ The status comes from the verdict. Quote its `deciding_values` and add only the 
      with counts, in the headline of `notes`** and list the URLs and enumeration in `evidence_found`. Distinguish a populated deployer
      (strong indication) from one present but empty (enabled, no sign of use). A local API Deployer targets API nodes: mention it
      separately as an API-node indication, not as evidence of an automation node.
+     If the deployer fact sets `remote_host_with_local_mode`, or shows a remote host recorded under local mode, or trust-all-certificates enabled, add an `Action:` to
+     confirm whether the remote setting is a leftover and whether certificate checking should be on; it does not change the status.
   2. **Remote deployer:** a design node pushing to an external Deployer URL suggests Design -> Deployer -> Automation, but any
      automation infrastructure is defined on that node, not in this bundle. Exported project bundles are weak supporting evidence.
   3. **Otherwise:** say in `notes` that no definitive configuration shows whether an automation node is deployed, and that it needs
@@ -82,17 +84,19 @@ The status comes from the verdict. Quote its `deciding_values` and add only the 
   secrets store` (never the value); it does not change the status. False or ABSENT: add nothing.
 - **SCALE-002:** name the flavor and the estate signal in `evidence_found`; whether managed datasets actually sync is a live check.
 - **SCALE-004:** say a scenario's script was not read; run history, whether cleanup runs, and whether it covers logs, idle kernels
-  or both are `notes` only.
+  or both are `notes` only. If the `run_as_user_missing` fact has a count, say that the scenarios listed in it cannot run because
+  their configured user no longer exists, and name any that is the only active scheduled cleanup scenario; the status is unchanged.
 - **SCALE-006:** give the message counts; the warnings it lists are judged by the checks they relate to, not here.
 - **SCALE-007:** make the finding useful. The bundle usually holds only a few hours of backend log, so quote counts with their
   window (e.g. `214 in ~2.6h`) in both `evidence_found` and `notes`, and group by message pattern (digits and ids normalised), not
   by raw line. When one pattern dominates (e.g. repeated rejected WebSocket sessions that were not logged in), say so in `notes`
   with its share, and put the `Action:` on the real failures (e.g. failing API calls). The reader's `data-dir-runtime-and-codeenvs`
-  reference says how to count and get the window.
+  reference says how to count and get the window. Take the pattern groups, their shares and windows from the `backend_log` fact's
+  `top_error_patterns` rather than re-counting by hand, and mention `run_as_user_missing` when its count is not zero.
 - **SCALE-008:** state in `evidence_found` which of the five checks you used (RAM tier, 3x config folder, dead zone, the
   `OutOfMemoryError` count with its window); never assume a tier from RAM alone. `jek.xmx` and `fek.xmx` oversizing has no
   threshold: `notes` only. A Pass covers current sizing and the recent logs only: say in `notes` that historical JVM or native-memory
-  crash dumps are judged elsewhere and that Pass is not crash-free assurance.
+  crash dumps are not a basis for this status and that Pass is not crash-free assurance. If the `crash_dumps` fact has a count, list each dump's date, process and problem class in `notes` and add an `Action:` to review them; the status is unchanged.
 - **SCALE-009:** on Needs Review, ask whether the sizing is justified. A limit that sits in a different place than its name suggests
   still counts.
 - **SCALE-010:** name the non-blank values; call a non-blank engine preference the riskier one.

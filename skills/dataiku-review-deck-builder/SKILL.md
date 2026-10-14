@@ -118,7 +118,8 @@ this plugin's README). If the call fails with a "Base deck not found" error, wor
 the first step that gets a deck:
 1. **Ask for the template** (one short question). If the user has it, retry with `base_deck_path`; the README's one-time setup is
    the durable fix.
-2. **Don't guess a path or build on a stub or blank presentation:** the generator edits the template's own slides.
+2. **Don't guess a path or build on a stub or blank presentation:** the generator edits the template's own slides. Don't search the
+   disk for a copy either: a file with the right name may not be the approved template.
 3. **Standard deck.** If the user has no template, says to go without it, or you cannot ask (an unattended run), call again with
    `allow_standard_deck=true` (v2; omit `base_deck_path`). Style v1 has no fallback: use v2 (tell the user) or report that the
    template is needed.
@@ -142,6 +143,8 @@ not Dataiku-branded, and a branded one needs the template plus a rebuild from th
   (malformed XML, dangling relationships, leftover placeholder text), never visual layout, so this
   checklist is the only QA pass that catches that. If a renderer is available (e.g. LibreOffice:
   `soffice --headless --convert-to pdf <deck>`, then `pdftoppm -png` and look at the images), render
-  the deck and check the slides yourself, and say so if no renderer was available.
+  the deck and check the slides yourself. Preflight's `renderer=` line says whether `soffice` and `pdftoppm` are installed; when it
+  is `none`, say no renderer was available and that text overflow and layout were not checked (on macOS,
+  `brew install --cask libreoffice` and `brew install poppler` add one).
 - Any other tool error (missing checklist, bad logo path, schema mismatch in the checklist) comes
   through as a real, specific message — relay it as-is rather than paraphrasing.

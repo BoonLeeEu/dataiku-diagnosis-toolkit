@@ -532,6 +532,20 @@ def metastore_and_exports():
 
 
 LOG_LINE = re.compile(rb"^\[(\d{4}/\d\d/\d\d-\d\d:\d\d:\d\d)[.\d]*\] \[[^\]]*\] \[([A-Z]+)\]")
+RUN_AS_MISSING = re.compile(rb"Cannot run scenario ([\w.-]+): configured to run as user '([^']*)' which does not exist")
+PATTERN_CAP, PATTERN_TOP, PATTERN_WIDTH = 500, 10, 120
+CRASH_DUMP_LINES = 3000
+
+
+def error_pattern(rest):
+    """A stable key for an ERROR/FATAL line: the logger plus the message's first clause (up to the first ": "), with quoted
+    text, project keys and numbers replaced, so repeats of one failure group together. `rest` is the line after the level token."""
+    m = re.match(r"\s*\[([^\]]*)\]\s*(?:-\s*)?(.*)", rest.decode("utf-8", "replace"), re.S)
+    logger, msg = (m.group(1), m.group(2)) if m else ("", rest.decode("utf-8", "replace"))
+    msg = re.sub(r"'[^']*'|\"[^\"]*\"", "'<x>'", msg.strip())
+    msg = re.sub(r"\b[A-Z][A-Z0-9_]{2,}(?:\.[\w-]+)+", "<KEY>", msg)
+    msg = re.sub(r"\d+", "N", msg.split(": ", 1)[0])
+    return f"[{logger}] {msg}"[:PATTERN_WIDTH]
 
 
 @fact("backend_log")
@@ -549,6 +563,8 @@ def backend_log():
     if not names:
         return absent(f"{rel}/backend.log*")
     files = []
+    patterns, overflow = {}, 0
+    run_as = {"count": 0, "scenarios": {}, "users": set(), "first": None, "last": None}
     for n in names:
         counts = {"ERROR": 0, "FATAL": 0, "WARN": 0}
         oom, first, last = 0, None, None
@@ -562,13 +578,68 @@ def backend_log():
                     lvl = m.group(2).decode()
                     if lvl in counts:
                         counts[lvl] += 1
+                    if lvl in ("ERROR", "FATAL"):
+                        key = error_pattern(line[m.end():])
+                        if key in patterns or len(patterns) < PATTERN_CAP:
+                            e = patterns.setdefault(key, {"count": 0, "first": ts, "last": ts})
+                            e["count"] += 1
+                            e["first"], e["last"] = min(e["first"], ts), max(e["last"], ts)
+                        else:
+                            overflow += 1
+                        r = RUN_AS_MISSING.search(line)
+                        if r:
+                            run_as["count"] += 1
+                            sc = run_as["scenarios"].setdefault(r.group(1).decode(), 0)
+                            run_as["scenarios"][r.group(1).decode()] = sc + 1
+                            run_as["users"].add(r.group(2))
+                            run_as["first"] = min(run_as["first"] or ts, ts)
+                            run_as["last"] = max(run_as["last"] or ts, ts)
                 if b"OutOfMemoryError" in line:
                     oom += 1
         files.append({"file": n, **counts, "OutOfMemoryError": oom, "first": first or ABSENT, "last": last or ABSENT})
     total = lambda k: sum(f[k] for f in files)  # noqa: E731
+    errors = total("ERROR") + total("FATAL")
+    top = sorted(patterns.items(), key=lambda kv: (-kv[1]["count"], kv[0]))[:PATTERN_TOP]
+    top_patterns = [{"pattern": k, "count": v["count"], "share_pct": round(100 * v["count"] / errors, 1) if errors else 0,
+                     "first": v["first"], "last": v["last"]} for k, v in top]
+    run_as_missing = {"count": run_as["count"], "distinct_users": len(run_as["users"]),
+                      "scenarios": dict(sorted(run_as["scenarios"].items())), "first": run_as["first"] or ABSENT,
+                      "last": run_as["last"] or ABSENT}
     return found({"files": files, "ERROR": total("ERROR"), "FATAL": total("FATAL"), "WARN": total("WARN"),
-                  "OutOfMemoryError": total("OutOfMemoryError"), "gz_files_skipped": len(gz)},
-                 f"{rel}/backend.log*: line counts by level and OutOfMemoryError mentions (no log text)")
+                  "OutOfMemoryError": total("OutOfMemoryError"), "gz_files_skipped": len(gz),
+                  "top_error_patterns": top_patterns, "error_patterns_uncounted": overflow,
+                  "run_as_user_missing": run_as_missing},
+                 f"{rel}/backend.log*: line counts by level, OutOfMemoryError mentions, the most frequent ERROR/FATAL messages "
+                 "(normalised, truncated) and run-as-user-missing errors (user names never printed)")
+
+
+@fact("crash_dumps")
+def crash_dumps():
+    """JVM fatal crash dumps (`run/hs_err_pid*.log`): per dump the process (the main class's name), the cause line, the
+    problem class (e.g. Out of Memory Error, Internal Error) and when it happened. Reads each dump only down to its `java_command:` line."""
+    rel = "run"
+    base = os.path.join(MIRROR, rel)
+    if not os.path.isdir(base):
+        return absent(rel)
+    names = sorted(n for n in os.listdir(base) if re.fullmatch(r"hs_err_pid\d+\.log", n))
+    dumps = []
+    for n in names[:20]:
+        head = []
+        with open(os.path.join(base, n), "r", encoding="utf-8", errors="replace") as fh:
+            for _, line in zip(range(CRASH_DUMP_LINES), fh):  # the header, then up to the VM arguments' java_command
+                head.append(line.rstrip("\n"))
+                if line.startswith("java_command:"):
+                    break
+        text = "\n".join(head)
+        hashes = [ln.lstrip("# ").strip() for ln in head[:12] if ln.startswith("#") and ln.strip("# ")]
+        problem = re.search(r"^#\s+(Out of Memory Error|Internal Error|SIG[A-Z]+)", text, re.M)
+        when = re.search(r"^Time: (.+?)(?: elapsed time:.*)?$", text, re.M)
+        cmd = re.search(r"^java_command: (\S+)", text, re.M)
+        dumps.append({"file": n, "process": cmd.group(1).rsplit(".", 1)[-1] if cmd else ABSENT,
+                      "cause": hashes[0] if hashes else ABSENT, "problem": problem.group(1) if problem else ABSENT,
+                      "time": when.group(1).strip() if when else ABSENT})
+    return found({"count": len(names), "dumps": dumps},
+                 f"{rel}/hs_err_pid*.log: header lines and java_command only (cause, problem class, time, process)")
 
 
 def _num(v):
@@ -807,7 +878,9 @@ def deployer():
     if d == ABSENT or not isinstance(d, dict):
         return absent(f"{src}: deployerClientSettings")
     url = urlparse(d.get("nodeUrl") or "")
-    return found({"mode": d.get("mode", ABSENT),
+    mode = d.get("mode", ABSENT)
+    return found({"mode": mode,
+                  "remote_host_with_local_mode": bool(url.hostname) and isinstance(mode, str) and mode.upper() == "LOCAL",
                   "target_host": (url.hostname + (f":{url.port}" if url.port else "")) if url.hostname else ABSENT,
                   "api_key_configured": bool(d.get("apiKey")) if "apiKey" in d else ABSENT,
                   "trust_all_ssl_certificates": d.get("trustAllSSLCertificates", ABSENT)},

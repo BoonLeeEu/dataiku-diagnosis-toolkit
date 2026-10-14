@@ -51,3 +51,7 @@ def test_old_python_with_openpyxl_is_spreadsheet_only(tmp_path):
 
 def test_python_310_is_full(tmp_path):
     assert _run(tmp_path, stubs=["python3.12"])["TIER"] == "FULL"
+
+
+def test_renderer_line_reports_none_without_soffice(tmp_path):
+    assert _run(tmp_path, stubs=["python3.12"])["renderer"] == "none"

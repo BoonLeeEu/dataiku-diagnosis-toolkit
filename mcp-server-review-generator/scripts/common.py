@@ -17,6 +17,7 @@ BRANDING_TEMPLATE = RESOURCES_DIR / "Dataiku Branding Template 2026.pptx"
 
 # Fallbacks for when config/deck_layout.yaml omits the key (it normally sets both).
 DEFAULT_BASE_DECK = "resources/Dataiku Branding Template 2026.pptx"  # relative to REPO_ROOT
+BASE_DECK_ENV = "DATAIKU_BRANDING_TEMPLATE"  # optional absolute path to the template, used when base_deck_path is not given
 DEFAULT_ROWS_PER_SLIDE = 4
 
 _LEADING_NUMBER_RE = re.compile(r"^\s*\d+\s*[.)]\s*")

@@ -82,6 +82,8 @@ zero.
 
 **Counts.** `facts.py` `backend_log` streams every `backend.log*` file once and reports, per file, the lines at `ERROR`, `FATAL` and `WARN`, the lines naming an `OutOfMemoryError`, and the file's first and last timestamp (counts only, no log text; compressed rotations are skipped and counted). It counts a level only in the line's own `[LEVEL]` position, so subprocess output that quotes another log line (an `INFO` line carrying a nested `[ERROR]`) is not counted as an error; a looser `grep` for `[ERROR]` reads a few percent higher.
 
+`backend_log` also reports `top_error_patterns`: the ten most frequent `ERROR`/`FATAL` messages, each grouped by logger and the message's first clause (text before the first `: `), with quoted text, project keys and numbers replaced, and given as a count, a share of all errors and its own first/last timestamp. The text of the message is printed in that normalised, truncated form, so a dominant pattern's share can be quoted without a hand `grep`. `run_as_user_missing` counts the errors `Cannot run scenario <project.scenario>: configured to run as user '<name>' which does not exist` (a scenario whose owner was deleted: its trigger is skipped each time the trigger list rebuilds, so one scenario can produce thousands of lines), with the affected scenarios, a count of distinct users (never the names) and the window.
+
 **Time window.** Each rotated file covers a very different span: in the samples a file covered
 anywhere from ~1 hour (a busy design node) to ~3 days, so the same count means different things
 for different files. Take the first and last timestamp of **each** file so any count can be quoted
@@ -94,7 +96,7 @@ generation instant; quote each file's own window.
 **JVM crash dumps.** `hs_err_pid*.log` is large. Read only the header, the lines starting with
 `# ` (`grep '^# '`, first ~20): they state the cause (e.g. "There is insufficient memory for the
 Java Runtime Environment", "Native memory allocation (mmap) failed to map N bytes") and
-distinguish an OOM from a segfault (`SIGSEGV`). Never read the whole file.
+distinguish an OOM from a segfault (`SIGSEGV`). Never read the whole file. `facts.py` `crash_dumps` does this: per dump the process (the main class named by `java_command`, e.g. `DSSBackendMain` or `DSSJobKernelMain`), the cause line, the problem class (`Out of Memory Error`, `Internal Error`, `SIG...`) and the dump's `Time:`. The dump's own time is the date to quote, not the file's mtime.
 
 Cross-reference: when investigating a crash, check `hs_err_pid*.log` timestamps against
 `dmesg.txt` OOM-killer entries and `cgroups_usage.txt` to identify which project/activity type was

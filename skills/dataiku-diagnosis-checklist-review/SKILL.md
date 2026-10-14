@@ -161,6 +161,9 @@ Match each row by its `id` column (not by row number) when writing results,
 so the mapping is robust to row reordering. Verify every id in the sheet got
 a result and every result was consumed (no silent mismatches) before saving.
 
+Run ad-hoc workbook scripts with the interpreter `python3 <this skill>/scripts/run_step.py python` prints: the default `python3`
+often lacks openpyxl, and that command names one that has it.
+
 ## 6. Add/update a Summary sheet
 
 If the `write_summary` tool is not available, skip to the manual fallback at the end of this step

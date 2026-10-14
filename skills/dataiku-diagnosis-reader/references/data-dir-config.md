@@ -136,7 +136,7 @@ Observed shape on the one design sample that hosted a local deployer: `api-deplo
 no `infras/` or `deployments/` under it. Whether a populated Project Deployer also has `infras/`
 and `deployments/` is unverified. `api-deployer/` targets API nodes, not automation nodes. The
 mirror may not copy these subtrees, so also check `config_listing.txt`/`datadir_listing.txt`.
-`deployerClientSettings.mode` was `LOCAL` on that sample; `REMOTE` carries a `nodeUrl` to an
+`facts.py` `deployer` sets `remote_host_with_local_mode` when `mode` is `LOCAL` yet a `nodeUrl` host is recorded (probably a leftover remote setting; unverified), and reports `trust_all_ssl_certificates` as stored. `deployerClientSettings.mode` was `LOCAL` on that sample; `REMOTE` carries a `nodeUrl` to an
 external Deployer. Exported project bundles live under `<mirror>/bundles/<PROJECT>/` and are
 usually visible only in `datadir_listing.txt`.
 

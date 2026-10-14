@@ -10,6 +10,20 @@ vendored components (`skills/dataiku-diagnosis-reader/`, `mcp-server-review-gene
 
 ## [Unreleased]
 
+## [0.38.12] - 2026-10-14
+
+### Added
+
+- `run_step.py python` prints the interpreter to use for ad-hoc workbook scripts (this one if it has openpyxl, else the plugin virtualenv's), and the silent re-run under the virtualenv now says so on stderr.
+- `scripts/preflight.sh` prints a trailing `renderer=soffice+pdftoppm|none` line. The deck-builder skill uses it to say whether a visual check was possible and how to install a renderer.
+
+### Changed
+
+- Re-synced the diagnosis reader 0.21.0: `backend_log` adds `top_error_patterns` and `run_as_user_missing`, new `crash_dumps` fact, `deployer` adds `remote_host_with_local_mode`. Re-synced review generator 0.10.5: `DATAIKU_BRANDING_TEMPLATE` environment variable, and the "Base deck not found" error names the setup step.
+- Calibrations: SCALE-007 takes its pattern groups from `top_error_patterns`; SCALE-004 and SCALE-007 mention run-as-user-missing scenarios; SCALE-008 lists crash dumps in `notes` with an `Action:`. No status changes.
+- Deck-builder skill: an unattended run must not search the disk for a branding template; it uses `allow_standard_deck`.
+- Calibrations: SCALE-008's Pass note says crash dumps are not read by any check and asks for an `Action:` when the bundle holds some; ARCH-001 flags a local deployer with a remote host recorded, or trust-all-certificates on, as an `Action:` only.
+
 ## [0.38.11] - 2026-10-12
 
 ### Added

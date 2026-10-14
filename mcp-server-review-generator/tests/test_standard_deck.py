@@ -56,3 +56,9 @@ def test_standard_deck_builds_without_template(checklist_factory, tmp_path, monk
     cover = [sh.text_frame.text for sh in prs.slides[0].shapes if sh.has_text_frame]
     assert "ACME" in cover and any("not applied" in t for t in cover)
     assert not validate_deck.validate(res["output_path"])
+
+
+def test_env_var_names_the_template_and_error_names_the_setup_step(checklist_factory, tmp_path, monkeypatch):
+    monkeypatch.setenv("DATAIKU_BRANDING_TEMPLATE", str(tmp_path / "from_env.pptx"))
+    with pytest.raises(ToolError, match=r"from_env\.pptx.*DATAIKU_BRANDING_TEMPLATE"):
+        build(checklist_factory, tmp_path)

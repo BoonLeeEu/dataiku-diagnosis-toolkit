@@ -16,6 +16,7 @@ then calls build_deck.build_deck() / validate_deck.validate() unchanged.
 
 import functools
 import logging
+import os
 import sys
 import zipfile
 from datetime import datetime, timezone
@@ -163,8 +164,10 @@ def build_platform_review_deck(
     layout_config = common.load_config("deck_layout.yaml")
 
     checklist = _resolve(checklist_path)
+    env_template = os.environ.get(common.BASE_DECK_ENV, "").strip()
     base_deck = (
         _resolve(base_deck_path) if base_deck_path
+        else _resolve(env_template) if env_template
         else common.REPO_ROOT / layout_config.get("base_deck", common.DEFAULT_BASE_DECK)
     )
     logo = _resolve(logo_path) if logo_path else None
@@ -187,7 +190,11 @@ def build_platform_review_deck(
                 "Supply the Dataiku Branding Template with base_deck_path; style v1 has no unbranded fallback "
                 "(style v2 does)."
             )
-            raise FileNotFoundError(f"Base deck not found: {base_deck}. {hint}")
+            setup = (
+                f" To set it up once: put the template at {common.DEFAULT_BASE_DECK} in the plugin, or set "
+                f"{common.BASE_DECK_ENV} to its absolute path (see the README's \"One-time setup\")."
+            )
+            raise FileNotFoundError(f"Base deck not found: {base_deck}. {hint}{setup}")
         standard_deck = True
     if logo is not None and not logo.exists():
         raise FileNotFoundError(f"Logo file not found: {logo}")

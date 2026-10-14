@@ -9,6 +9,15 @@ adheres to [Semantic Versioning](https://semver.org/). The version tracked here 
 Versioning is scoped to this directory (`dataiku-diagnosis-reader/`) only, since it's the unit
 that gets copied/symlinked into a skills root independently of the rest of this repo.
 
+## [0.21.0] - 2026-10-14
+
+### Added
+
+- `scripts/facts.py` `backend_log` gains `top_error_patterns` (the ten most frequent ERROR/FATAL messages, normalised, with count, share and first/last timestamp) and `run_as_user_missing` (errors for scenarios configured to run as a user that no longer exists: scenarios, distinct-user count, window; user names never printed).
+- New fact `crash_dumps`: per `run/hs_err_pid*.log` the process, cause, problem class and time, read from the header only.
+- `deployer` gains `remote_host_with_local_mode`.
+- `references/data-dir-runtime-and-codeenvs.md` and `references/data-dir-config.md` document the above.
+
 ## [0.20.1] - 2026-10-08
 
 ### Changed

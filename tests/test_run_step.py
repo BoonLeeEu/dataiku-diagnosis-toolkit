@@ -1,6 +1,7 @@
 """run_step.py (checklist-review skill): records reader script runs and verifies a finished review."""
 import json
 import subprocess
+from pathlib import Path
 import sys
 
 import openpyxl
@@ -176,3 +177,8 @@ def test_missing_openpyxl_without_a_venv_exits_with_the_fix(monkeypatch):
         assert "DATAIKU_PYTHON" in str(e.code) and "openpyxl" in str(e.code)
     else:
         raise AssertionError("expected SystemExit")
+
+
+def test_python_subcommand_prints_an_interpreter_with_openpyxl():
+    out = subprocess.run([sys.executable, str(SCRIPT), "python"], capture_output=True, text=True)
+    assert out.returncode == 0 and Path(out.stdout.strip()).is_file()

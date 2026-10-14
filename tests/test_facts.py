@@ -163,3 +163,34 @@ def test_byo_llm_is_active_only_when_a_main_llm_or_reference_project_is_set():
     assert on["active"] is True and on["referenceProjectKey_set"] is True and on["mainLLMId"].endswith("gpt-5.2")
     partial = run_facts("synthetic_design_admin_python")["byo_llm"]["value"]
     assert partial["active"] is True and partial["referenceProjectKey_set"] is False
+
+
+def test_backend_log_groups_error_patterns_and_run_as_errors_without_user_names(tmp_path):
+    bundle = tmp_path / "bundle"
+    shutil.copytree(BUNDLES / "synthetic_design_baseline", bundle)
+    log = next(bundle.rglob("backend.log"))
+    metric = "[2026/01/06-0{h}:00:00.000] [m-{h}] [ERROR] [dku.monitoring] - Error parsing graphite line: api{h}.cpu {h}"
+    runas = ("[2026/01/07-00:00:00.000] [t-1] [ERROR] [dip.scenarios.trigger.service]  - Failed to build trigger runner "
+             "(PROJ.SC.abc), skipping: Cannot run scenario PROJ.SC: configured to run as user 'gone_user' which does not exist")
+    log.write_text(log.read_text() + "\n".join(metric.format(h=h) for h in range(1, 4)) + "\n" + runas + "\n")
+    out, facts = _facts_for(bundle)
+    v = facts["backend_log"]["value"]
+    top = {p["pattern"]: p for p in v["top_error_patterns"]}
+    graphite = top["[dku.monitoring] Error parsing graphite line"]
+    assert graphite["count"] == 3 and graphite["first"] == "2026/01/06-01:00:00" and graphite["last"] == "2026/01/06-03:00:00"
+    assert v["run_as_user_missing"]["count"] == 1 and v["run_as_user_missing"]["scenarios"] == {"PROJ.SC": 1}
+    assert v["run_as_user_missing"]["distinct_users"] == 1
+    assert "gone_user" not in out
+
+
+def test_crash_dumps_report_header_fields_only():
+    dumps = run_facts("synthetic_design_baseline")["crash_dumps"]["value"]
+    assert dumps["count"] == 1 and dumps["dumps"][0]["file"] == "hs_err_pid4242.log"
+    assert dumps["dumps"][0]["cause"].startswith("There is insufficient memory")
+
+
+def test_deployer_flags_a_remote_host_recorded_under_local_mode(tmp_path):
+    bundle = mutated_bundle(tmp_path, "synthetic_design_k8s_remote", lambda doc: doc["deployerClientSettings"].update(mode="LOCAL"))
+    _, facts = _facts_for(bundle)
+    assert facts["deployer"]["value"]["remote_host_with_local_mode"] is True
+    assert run_facts("synthetic_design_k8s_remote")["deployer"]["value"]["remote_host_with_local_mode"] is False

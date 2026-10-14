@@ -73,6 +73,7 @@ def ensure_openpyxl() -> None:
     pythons = venv_pythons()
     if pythons and not os.environ.get(REEXEC_ENV):
         os.environ[REEXEC_ENV] = "1"
+        print(f"run_step.py: openpyxl missing for {sys.executable}; re-running under {pythons[0]}", file=sys.stderr)
         os.execv(str(pythons[0]), [str(pythons[0]), *sys.argv])
     sys.exit("run_step.py: openpyxl is not installed for this Python and no plugin virtualenv was found; run it with the plugin's "
              "mcp-server-review-generator/.venv/bin/python3, or set DATAIKU_PYTHON to a Python 3.10+ that has openpyxl")
@@ -252,9 +253,27 @@ def verify(bundle: str, manifest: Path, checklist: Path, deck: Path | None) -> l
     return problems
 
 
+def print_python() -> int:
+    """Print the interpreter to use for ad-hoc workbook scripts: this one if it has openpyxl, else the plugin virtualenv's."""
+    try:
+        import openpyxl  # noqa: F401
+        print(sys.executable)
+        return 0
+    except ImportError:
+        pass
+    pythons = venv_pythons()
+    if not pythons:
+        sys.exit("run_step.py: no Python with openpyxl found; set DATAIKU_PYTHON to a Python 3.10+ that has openpyxl")
+    print(pythons[0])
+    return 0
+
+
 def main() -> int:
+    if sys.argv[1:] == ["python"]:
+        return print_python()
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
+    sub.add_parser("python", help="print the interpreter to use for ad-hoc openpyxl scripts")
     r = sub.add_parser("run")
     r.add_argument("step", choices=sorted(READER_STEPS))
     d = sub.add_parser("verdicts")

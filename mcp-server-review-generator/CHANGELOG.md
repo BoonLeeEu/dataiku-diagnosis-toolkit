@@ -7,6 +7,16 @@ adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.10.5] - 2026-10-14
+
+### Added
+
+- `DATAIKU_BRANDING_TEMPLATE`: optional environment variable holding the absolute path of the branding template. `build_platform_review_deck` uses it when `base_deck_path` is not given, so the template can live outside the plugin cache.
+
+### Changed
+
+- The "Base deck not found" error now also names the one-time setup step (the default location or the environment variable).
+
 ## [0.10.4] - 2026-10-12
 
 ### Fixed

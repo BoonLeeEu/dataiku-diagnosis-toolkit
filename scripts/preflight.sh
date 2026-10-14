@@ -3,6 +3,7 @@
 #   TIER=FULL         workbook + Summary + deck (Python >=3.10 with mcp, python-pptx, openpyxl, PyYAML, Pillow, lxml)
 #   TIER=SPREADSHEET  workbook only (some Python has openpyxl; no deck)
 #   TIER=FACTS_ONLY   orient/facts findings in chat only (no workbook, no deck)
+# A trailing renderer=soffice+pdftoppm|none line says whether the deck can be rendered for a visual check.
 # The interpreter candidates mirror start-review-generator.sh; keep the two lists in step.
 set -uo pipefail
 
@@ -10,6 +11,13 @@ SRC="${BASH_SOURCE[0]}"; [[ "$SRC" == */* ]] || SRC="./$SRC"  # no dirname: it m
 SCRIPT_DIR="$(cd "${SRC%/*}" && pwd)"
 SERVER_DIR="$SCRIPT_DIR/../mcp-server-review-generator"
 [[ -n "${PREFLIGHT_PATH_AS_IS:-}" ]] || export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"  # as-is is for tests
+
+# Deck renderer for the visual check (informational only; it never changes the tier).
+renderer_line() {
+  if command -v soffice >/dev/null 2>&1 && command -v pdftoppm >/dev/null 2>&1; then echo "renderer=soffice+pdftoppm"
+  else echo "renderer=none"; fi
+}
+trap renderer_line EXIT
 
 ok310() { "$1" -c 'import sys; sys.exit(sys.version_info < (3, 10))' >/dev/null 2>&1; }
 missing_in() {  # missing_in <python> <module>...  -> prints the modules it can't import
