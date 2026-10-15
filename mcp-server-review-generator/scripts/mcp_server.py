@@ -165,7 +165,7 @@ def build_platform_review_deck(
 
     checklist = _resolve(checklist_path)
     env_template = os.environ.get(common.BASE_DECK_ENV, "").strip()
-    base_deck = (
+    base_deck = common.resolve_base_deck_file(
         _resolve(base_deck_path) if base_deck_path
         else _resolve(env_template) if env_template
         else common.REPO_ROOT / layout_config.get("base_deck", common.DEFAULT_BASE_DECK)

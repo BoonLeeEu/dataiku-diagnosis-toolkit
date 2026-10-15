@@ -1,7 +1,7 @@
 ---
 name: "dataiku-diagnosis-reader"
 description: "Navigate and interpret an extracted Dataiku DSS diagnosis.zip support bundle (also: DSS diagnostic export, a folder named dku_diagnosis_*) to answer troubleshooting questions on instance configuration, crashes/OOMs, performance, users, connections, projects, code environments, plugins and logs, without re-deriving the bundle layout. Use whenever the user provides or asks about a Dataiku diagnosis bundle."
-version: 0.21.0
+version: 0.22.0
 ---
 
 # Dataiku DSS diagnosis.zip reader

@@ -64,7 +64,7 @@ The status comes from the verdict. Quote its `deciding_values` and add only the 
 - **ARCH-001:** the status is always Needs Review. Use the reader's `node-types` and `data-dir-config` (deployer) references to find
   indicators and report what you find. On a **design** bundle, in this order:
   1. **Local Project Deployer on the design host:** one holding projects to deploy to an automation node indicates one is in use.
-     Enumerate what it holds (infrastructures, deployments, published projects, any automation-node URLs). **Put this indication,
+     Take the counts from the `local_deployer` fact, then enumerate what it holds (infrastructures, deployments, published projects, any automation-node URLs). **Put this indication,
      with counts, in the headline of `notes`** and list the URLs and enumeration in `evidence_found`. Distinguish a populated deployer
      (strong indication) from one present but empty (enabled, no sign of use). A local API Deployer targets API nodes: mention it
      separately as an API-node indication, not as evidence of an automation node.
@@ -82,6 +82,9 @@ The status comes from the verdict. Quote its `deciding_values` and add only the 
   availability caveat). Pool size against `max_connections` and backups are `notes` only. When `facts.py`'s `internal_database`
   reports `password_stored_in_plaintext: true`, `notes` carries `Action: rotate the stored database credential and move it to a
   secrets store` (never the value); it does not change the status. False or ABSENT: add nothing.
+  On the rule's Needs Review for a missing `internalDatabase.connection` override, `notes` says the embedded H2 is inferred from that
+  absence, and the `Action:` is to confirm the runtime database live with the platform team (it may be a local PostgreSQL set up at
+  install time and configured outside the bundle).
 - **SCALE-002:** name the flavor and the estate signal in `evidence_found`; whether managed datasets actually sync is a live check.
 - **SCALE-004:** say a scenario's script was not read; run history, whether cleanup runs, and whether it covers logs, idle kernels
   or both are `notes` only. If the `run_as_user_missing` fact has a count, say that the scenarios listed in it cannot run because
@@ -109,6 +112,7 @@ The status comes from the verdict. Quote its `deciding_values` and add only the 
   that the bundle does show (the cgroup targets and their count) and whether UIF is enabled, without naming files. `Action:` check on the
   host that each of those hierarchies is listed among the additional allowed directories of the UIF security configuration.
 - **SEC-008:** give the number of groups and whether any grant broad admin rights, never user or group names beyond built-in ones.
+  Take the counts from the `groups` fact (see the reader's `data-dir-config` reference), not by opening the user directory.
   Whether the design suits the customer is an `Action:`.
 - **SEC-011:** quote any proxy setting that is present (host only, never credentials); otherwise say none was found, and that a proxy
   may sit outside DSS. `Action:` ask for the proxy documentation.

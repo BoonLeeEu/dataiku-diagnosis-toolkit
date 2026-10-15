@@ -194,3 +194,23 @@ def test_deployer_flags_a_remote_host_recorded_under_local_mode(tmp_path):
     _, facts = _facts_for(bundle)
     assert facts["deployer"]["value"]["remote_host_with_local_mode"] is True
     assert run_facts("synthetic_design_k8s_remote")["deployer"]["value"]["remote_host_with_local_mode"] is False
+
+
+def test_groups_fact_reports_counts_only(tmp_path):
+    bundle = mutated_bundle(tmp_path, "synthetic_design_baseline", lambda doc: None)
+    mirror = next(bundle.rglob("general-settings.json")).parent
+    (mirror / "users.json").write_text(json.dumps({"users": [], "groups": [
+        {"name": "secret-admins", "sourceType": "LOCAL", "admin": True, "mayCreateProjects": True},
+        {"name": "analysts", "sourceType": "LDAP", "admin": False, "mayManageUDM": False}]}))
+    value, out = _facts_for(bundle)[1]["groups"]["value"], json.dumps(_facts_for(bundle)[1]["groups"])
+    assert value == {"count": 2, "admin_groups": 1, "may_create_projects": 1, "may_manage_udm": 0,
+                     "by_source_type": {"LOCAL": 1, "LDAP": 1}}
+    assert "secret-admins" not in out
+    assert run_facts("synthetic_design_k8s_remote")["groups"]["value"] == "ABSENT"
+
+
+def test_local_deployer_fact_counts_files():
+    v = run_facts("synthetic_design_baseline")["local_deployer"]["value"]
+    assert v["project_deployer_infras"] == 1 and v["project_deployer_deployments"] == 1
+    assert v["project_deployer_projects"] == "ABSENT" and v["api_deployer_services"] == "ABSENT"
+    assert run_facts("synthetic_design_k8s_remote")["local_deployer"]["value"] == "ABSENT"

@@ -1030,7 +1030,11 @@ def main(argv=None):
     logger.info("Dataiku Review Generator v%s", common.VERSION)
 
     layout_config = common.load_config("deck_layout.yaml")
-    base_deck = args.base_deck or (common.REPO_ROOT / layout_config.get("base_deck", common.DEFAULT_BASE_DECK))
+    try:
+        base_deck = common.resolve_base_deck_file(
+            args.base_deck or (common.REPO_ROOT / layout_config.get("base_deck", common.DEFAULT_BASE_DECK)))
+    except FileNotFoundError as exc:
+        parser_error(str(exc))
     rows_per_slide = args.rows_per_slide or layout_config.get("table_rows_per_slide", common.DEFAULT_ROWS_PER_SLIDE)
     include_pass_items = args.include_pass_items or layout_config.get("include_pass_items", True)
     output_path = args.output or common.default_output_path(args.checklist, args.customer)

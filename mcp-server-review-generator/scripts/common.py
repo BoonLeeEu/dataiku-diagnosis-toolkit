@@ -20,6 +20,26 @@ DEFAULT_BASE_DECK = "resources/Dataiku Branding Template 2026.pptx"  # relative 
 BASE_DECK_ENV = "DATAIKU_BRANDING_TEMPLATE"  # optional absolute path to the template, used when base_deck_path is not given
 DEFAULT_ROWS_PER_SLIDE = 4
 
+def resolve_base_deck_file(path: Path) -> Path:
+    """Return the template file for a base-deck path. A directory (e.g. the plugin's `resources/` folder,
+    which is easy to give instead of the file) resolves to the one .pptx in it, preferring the branding
+    template's own name; no match or several candidates is an error naming what was found. A file or a
+    missing path is returned unchanged, so the caller's existing not-found handling still applies."""
+    if not path.is_dir():
+        return path
+    exact = path / BRANDING_TEMPLATE.name
+    if exact.is_file():
+        return exact
+    candidates = sorted(p for p in path.glob("*.pptx") if not p.name.startswith("~$"))
+    if len(candidates) == 1:
+        return candidates[0]
+    found = ", ".join(p.name for p in candidates) if candidates else "no .pptx files"
+    raise FileNotFoundError(
+        f"Base deck path is a directory: {path} ({found}). Give the full path to "
+        f"{BRANDING_TEMPLATE.name}."
+    )
+
+
 _LEADING_NUMBER_RE = re.compile(r"^\s*\d+\s*[.)]\s*")
 
 

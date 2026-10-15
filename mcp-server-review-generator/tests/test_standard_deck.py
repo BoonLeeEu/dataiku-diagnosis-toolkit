@@ -62,3 +62,22 @@ def test_env_var_names_the_template_and_error_names_the_setup_step(checklist_fac
     monkeypatch.setenv("DATAIKU_BRANDING_TEMPLATE", str(tmp_path / "from_env.pptx"))
     with pytest.raises(ToolError, match=r"from_env\.pptx.*DATAIKU_BRANDING_TEMPLATE"):
         build(checklist_factory, tmp_path)
+
+
+def test_base_deck_directory_resolves_to_the_template(tmp_path):
+    from scripts import common
+    (tmp_path / "other.pptx").write_bytes(b"x")
+    (tmp_path / common.BRANDING_TEMPLATE.name).write_bytes(b"x")
+    assert common.resolve_base_deck_file(tmp_path) == tmp_path / common.BRANDING_TEMPLATE.name
+    assert common.resolve_base_deck_file(tmp_path / "file.pptx") == tmp_path / "file.pptx"
+
+
+def test_base_deck_directory_single_pptx_and_errors(tmp_path):
+    from scripts import common
+    with pytest.raises(FileNotFoundError, match="no .pptx files"):
+        common.resolve_base_deck_file(tmp_path)
+    (tmp_path / "a.pptx").write_bytes(b"x")
+    assert common.resolve_base_deck_file(tmp_path) == tmp_path / "a.pptx"
+    (tmp_path / "b.pptx").write_bytes(b"x")
+    with pytest.raises(FileNotFoundError, match="a.pptx, b.pptx"):
+        common.resolve_base_deck_file(tmp_path)

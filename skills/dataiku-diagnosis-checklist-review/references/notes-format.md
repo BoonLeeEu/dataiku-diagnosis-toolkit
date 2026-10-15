@@ -12,7 +12,7 @@ newlines, each bullet starting with `• `:
 
 - **Length:** at most 320 characters in total and at most 3 bullets under
   the headline. For **Pass** and **Not Applicable**, use the headline plus at
-  most one bullet, ≤ 140 characters in total.
+  most one bullet, ≤ 140 characters in total, unless a calibration requires listing items (e.g. SCALE-008's crash dumps): then ≤ 200.
 - **Not Applicable headline:** `Not applicable: <one reason>` (e.g. `Not applicable: no local
   Hugging Face`), never a chain of colons.
 - **Self-contained:** carry the decisive values (e.g. `backend.xmx=2g`,

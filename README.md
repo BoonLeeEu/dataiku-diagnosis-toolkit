@@ -127,10 +127,14 @@ The review generator only reads the checklist, narrative and logo paths the call
 into it, real customer diagnosis bundles; treat any such bundle as private data to be supplied
 by whoever is running a review, not part of the toolkit itself.
 
+A finished review's `*_verdicts.json` carries the instance (install) id (SEC-001). It is not a credential, but treat the file as customer-identifying. Passwords, tokens and API keys are never printed by the facts script or written to the workbook.
+
 The Dataiku branding template used by `mcp-server-review-generator/` is a separate concern: it's
 an internal Dataiku brand asset, not customer/bundle data, so it isn't covered by the warning
 above — it's simply not committed here because of its size (134MB, over GitHub's 100MB limit),
 the same reason its own upstream repo doesn't commit it either.
+
+For the deck's visual QA the preflight reports `renderer=`; `none` means the layout was not checked. On macOS `brew install --cask libreoffice && brew install poppler` provides `soffice` and `pdftoppm`.
 
 ## How a status is decided
 

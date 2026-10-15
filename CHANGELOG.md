@@ -10,6 +10,19 @@ vendored components (`skills/dataiku-diagnosis-reader/`, `mcp-server-review-gene
 
 ## [Unreleased]
 
+## [0.38.13] - 2026-10-15
+
+### Added
+
+- Re-synced the diagnosis reader 0.22.0: new `groups` fact (SEC-008 counts) and `local_deployer` fact (ARCH-001 project and API deployer file counts).
+- Review generator 0.10.6: `base_deck_path`, `--base-deck` and `DATAIKU_BRANDING_TEMPLATE` accept the folder holding the template.
+
+### Changed
+
+- `calibrations.md`: SCALE-001 Needs Review (embedded H2 inferred) guidance; SEC-008 and ARCH-001 use the new facts.
+- `notes-format.md`: a Pass that must list items (SCALE-008 crash dumps) may run to 200 characters.
+- README and CODEX_SETUP: renderer install hint; note that `*_verdicts.json` carries the instance id.
+
 ## [0.38.12] - 2026-10-14
 
 ### Added

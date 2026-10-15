@@ -10,7 +10,7 @@ The richest area of the bundle. All paths below are relative to the data-dir mir
 | `general-settings.json` | Master instance settings: LDAP/SSO/Azure AD auth, proxy, mail, container/k8s settings, Spark/Hadoop/Hive settings, security, code-env defaults, GenAI settings, job concurrency (`maxRunningActivities`), CORS, git integration | Largest/most important config file (tens of KB). Also holds `deployerClientSettings` (mode `REMOTE` = this node is a deployment target) and `governIntegrationSettings` (Govern MLOps integration) — see `references/node-types.md`. For cgroups/container/Spark/K8s resource settings, see the resource-governance subsection below; for the internal (H2 vs. PostgreSQL) database, see the subsection right after it |
 | `license.json` | License/entitlement info: licensee, instanceId, licenseKind, feature flags (`maxFullDesigners`, `maxAIConsumers`, ...) | May be a signed/opaque blob (`{content, r1Sig, r1Pub, r1PubSig}`) rather than flat JSON |
 | `connections.json` | Every configured data connection (DB/cloud/filesystem/HDFS/MFT) | **Top-level shape is `{"connections": {<name>: {...}}}`**, not a bare name-keyed dict. Fields per connection: `type`, `params`, `allowedGroups`, `credentialsMode`, `allowWrite`, `allowManagedDatasets`. `params` can hold plaintext secrets: inspect with `scripts/peek.py`, never dump |
-| `users.json` | Full user + group directory | Per user: `login`, `displayName`, hashed `password`, `userProfile`, `groups`, `sourceType` (LDAP/local), `enabled` — contains PII, handle carefully |
+| `users.json` | Full user + group directory (top-level keys `users` and `groups`) | `groups[]` carries `name`, `sourceType`, `admin`, `mayCreateProjects`, `mayManageUDM` (`facts.py` `groups` reports counts only, never names). Per user: `login`, `displayName`, hashed `password`, `userProfile`, `groups`, `sourceType` (LDAP/local), `enabled` — contains PII, handle carefully |
 | `dip.properties` | Low-level backend property overrides | `key=value` lines, e.g. `dku.exports.disableAllExports=true` |
 | `personal-apikeys.json` / `public-apikeys.json` | API key metadata (scopes, owning user) | |
 | `variables.json` | Instance-level global variables | |
@@ -136,7 +136,7 @@ Observed shape on the one design sample that hosted a local deployer: `api-deplo
 no `infras/` or `deployments/` under it. Whether a populated Project Deployer also has `infras/`
 and `deployments/` is unverified. `api-deployer/` targets API nodes, not automation nodes. The
 mirror may not copy these subtrees, so also check `config_listing.txt`/`datadir_listing.txt`.
-`facts.py` `deployer` sets `remote_host_with_local_mode` when `mode` is `LOCAL` yet a `nodeUrl` host is recorded (probably a leftover remote setting; unverified), and reports `trust_all_ssl_certificates` as stored. `deployerClientSettings.mode` was `LOCAL` on that sample; `REMOTE` carries a `nodeUrl` to an
+`facts.py` `local_deployer` counts those files (project-deployer projects, infras, deployments; API-deployer infras, services, deployments; `ABSENT` = directory missing, names not printed). `facts.py` `deployer` sets `remote_host_with_local_mode` when `mode` is `LOCAL` yet a `nodeUrl` host is recorded (probably a leftover remote setting; unverified), and reports `trust_all_ssl_certificates` as stored. `deployerClientSettings.mode` was `LOCAL` on that sample; `REMOTE` carries a `nodeUrl` to an
 external Deployer. Exported project bundles live under `<mirror>/bundles/<PROJECT>/` and are
 usually visible only in `datadir_listing.txt`.
 

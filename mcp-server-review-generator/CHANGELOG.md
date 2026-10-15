@@ -7,6 +7,12 @@ adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.10.6] - 2026-10-15
+
+### Changed
+
+- `base_deck_path`, `--base-deck` and `DATAIKU_BRANDING_TEMPLATE` accept a directory: it resolves to the branding template in it, or to the only `.pptx` there. No match, or several, is an error that lists what was found.
+
 ## [0.10.5] - 2026-10-14
 
 ### Added

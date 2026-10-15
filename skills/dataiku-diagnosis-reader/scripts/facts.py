@@ -887,6 +887,47 @@ def deployer():
                  f"{src}: deployerClientSettings (API key value and URL credentials never printed)")
 
 
+@fact("groups")
+def groups():
+    src = "config/users.json"
+    doc = load_json(src)
+    if not isinstance(doc, dict) or not isinstance(doc.get("groups"), list):
+        return absent(f"{src}: groups")
+    gl = [g for g in doc["groups"] if isinstance(g, dict)]
+    src_types = {}
+    for g in gl:
+        key = str(g.get("sourceType", ABSENT))
+        src_types[key] = src_types.get(key, 0) + 1
+    return found({"count": len(gl),
+                  "admin_groups": sum(1 for g in gl if g.get("admin") is True),
+                  "may_create_projects": sum(1 for g in gl if g.get("mayCreateProjects") is True),
+                  "may_manage_udm": sum(1 for g in gl if g.get("mayManageUDM") is True),
+                  "by_source_type": src_types},
+                 f"{src}: groups (counts only, group and user names not printed)")
+
+
+@fact("local_deployer")
+def local_deployer():
+    base = os.path.join(MIRROR, "config")
+
+    def count(rel):
+        path = os.path.join(base, rel)
+        if not os.path.isdir(path):
+            return ABSENT
+        return sum(1 for n in os.listdir(path) if n.endswith(".json"))
+
+    counts = {"project_deployer_projects": count("project-deployer/projects"),
+              "project_deployer_infras": count("project-deployer/infras"),
+              "project_deployer_deployments": count("project-deployer/deployments"),
+              "api_deployer_infras": count("api-deployer/infras"),
+              "api_deployer_services": count("api-deployer/published-services"),
+              "api_deployer_deployments": count("api-deployer/deployments")}
+    if all(v == ABSENT for v in counts.values()):
+        return absent("config/project-deployer", "config/api-deployer")
+    return found(counts, "config/project-deployer/{projects,infras,deployments}, config/api-deployer/{infras,published-services,deployments} "
+                         "(file counts only, names not printed; ABSENT = directory missing)")
+
+
 def find_mirror(root):
     for dirpath, dirs, files in os.walk(root):
         if dirpath[len(root):].count(os.sep) > 6:
