@@ -109,3 +109,68 @@ def test_validate_flags_undeclared_notes_master_and_stale_size_label(checklist_f
     problems = validate_deck.validate(res["output_path"])
     assert any("notesMasterIdLst" in p for p in problems)
     assert any("screen4x3" in p for p in problems)
+
+
+def _slide_xml(path):
+    import zipfile
+    with zipfile.ZipFile(path) as z:
+        return "".join(z.read(n).decode("utf-8") for n in z.namelist() if n.startswith("ppt/slides/slide"))
+
+
+def _with_theme(monkeypatch, theme):
+    real = mcp_server.common.load_config
+
+    def load(name):
+        cfg = real(name)
+        if name == "deck_layout.yaml":
+            cfg["v2"]["standard_theme"] = theme
+        return cfg
+    monkeypatch.setattr(mcp_server.common, "load_config", load)
+
+
+def test_standard_theme_defaults_keep_the_dataiku_look(checklist_factory, tmp_path, monkeypatch):
+    monkeypatch.setattr(mcp_server.common, "REPO_ROOT", tmp_path)
+    xml = _slide_xml(build(checklist_factory, tmp_path, allow_standard_deck=True)["output_path"])
+    assert "06312E" in xml and "FEFEF9" in xml and "D6E4E2" in xml and 'typeface="Roboto"' in xml
+
+
+def test_standard_theme_applies_configured_colours_and_font(checklist_factory, tmp_path, monkeypatch):
+    import build_deck_v2
+    monkeypatch.setattr(mcp_server.common, "REPO_ROOT", tmp_path)
+    _with_theme(monkeypatch, {"dark": "1E2A4A", "page": "F7F7FB", "pale": "D5DAEA", "font": "Arial"})
+    res = build(checklist_factory, tmp_path, allow_standard_deck=True)
+    xml = _slide_xml(res["output_path"])
+    assert "1E2A4A" in xml and "F7F7FB" in xml and "D5DAEA" in xml and 'typeface="Arial"' in xml
+    assert "06312E" not in xml and "FEFEF9" not in xml and "D6E4E2" not in xml and "Roboto" not in xml
+    assert "3EDAB2" in xml  # accent and Pass colour are not themed
+    assert res["structural_problems"] == []
+    # the module's own colours are back to the defaults for the next build
+    assert (build_deck_v2.DK, build_deck_v2.BG, build_deck_v2.PALE, build_deck_v2.FONT) == \
+        ("06312E", "FEFEF9", "D6E4E2", "Roboto")
+
+
+def test_standard_theme_partial_config_falls_back_per_key(checklist_factory, tmp_path, monkeypatch):
+    monkeypatch.setattr(mcp_server.common, "REPO_ROOT", tmp_path)
+    _with_theme(monkeypatch, {"font": "Arial"})
+    xml = _slide_xml(build(checklist_factory, tmp_path, allow_standard_deck=True)["output_path"])
+    assert 'typeface="Arial"' in xml and "06312E" in xml
+
+
+@pytest.mark.parametrize("theme, message", [
+    ({"dark": "navy"}, "standard_theme.dark.*6-digit hex"),
+    ({"colour": "112233"}, "unknown key"),
+    ({"font": " "}, "font is empty"),
+])
+def test_standard_theme_rejects_bad_config(theme, message):
+    import build_deck_v2
+    with pytest.raises(ValueError, match=message):
+        build_deck_v2.resolve_standard_theme({"standard_theme": theme})
+
+
+def test_branded_build_ignores_the_standard_theme(monkeypatch):
+    import build_deck_v2
+    _with_theme(monkeypatch, {"dark": "not-a-colour"})
+    calls = []
+    monkeypatch.setattr(build_deck_v2, "_build_v2", lambda *a: calls.append(a) or {})
+    build_deck_v2.build_v2("c.xlsx", "Acme", "o.pptx", "base.pptx")  # would raise if the theme were resolved
+    assert calls

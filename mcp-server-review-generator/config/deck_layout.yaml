@@ -47,6 +47,14 @@ cell_char_limits:
 v2:
   detail_max_rows: 7        # hard cap on rows per appendix findings slide
   passed_title_chars: 45    # Passed-checks slide: truncate titles to this
+  # Look of the standard (unbranded) deck only; the branded deck takes its look from the template. Every key is
+  # optional and defaults to the values below, which are the Dataiku green and Roboto. Status, chart and accent
+  # colours are not themed. Quote the hex values.
+  standard_theme:
+    dark: "06312E"          # cover, dark slides, headings
+    page: "FEFEF9"          # light slide background
+    pale: "D6E4E2"          # text on dark backgrounds
+    font: "Roboto"          # body and title font; use one installed everywhere (e.g. Arial) for portability
   # Needs Review items are split by owner using these lowercase keywords in the
   # item's Action text (first owner, in this order, with a match wins).
   owner_keywords:

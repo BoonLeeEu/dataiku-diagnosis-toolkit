@@ -16,6 +16,7 @@ import logging
 import math
 import re
 import tempfile
+from contextlib import contextmanager
 from pathlib import Path
 
 from lxml import etree
@@ -40,6 +41,9 @@ logger = logging.getLogger(__name__)
 DK = "06312E"; MINT = "3EDAB2"; BG = "FEFEF9"; INK = "1A1A1A"; GREY = "5B6470"
 LINE = "E2E5EA"; RED = "C0392B"; AMBER = "EDAB4F"; BLUE = "7092F2"; WHITE = "FFFFFF"
 PALE = "D6E4E2"
+FONT = "Roboto"
+# Today's look, and the fallback for any key v2.standard_theme omits in config/deck_layout.yaml.
+DEFAULT_THEME = {"dark": DK, "page": BG, "pale": PALE, "font": FONT}
 STATUS = {  # chip fill, text
     "Pass": ("D9F7EF", "0B6B55"), "Fail": ("FDEAEA", "9B2C2C"), "Partial": ("FFF1D6", "8A5A00"),
     "Needs Review": ("E8EEFB", "2F4C9E"), "Not Applicable": ("F1F2F4", "5B6470"),
@@ -131,10 +135,10 @@ def badge(slide, x, y, d, text, name, size=9):
     return sh
 
 
-def P(runs, size=11, bold=False, color=INK, align="l", after=0, font="Roboto", before=0):
+def P(runs, size=11, bold=False, color=INK, align="l", after=0, font=None, before=0):
     if isinstance(runs, str):
         runs = [(runs, {})]
-    return dict(runs=runs, size=size, bold=bold, color=color, align=align, after=after, font=font, before=before)
+    return dict(runs=runs, size=size, bold=bold, color=color, align=align, after=after, font=font or FONT, before=before)
 
 
 def fill_tf(tf, paras):
@@ -178,7 +182,7 @@ def style_standard_title(slide, color):
     for para in tf.paragraphs:
         para.alignment = PP_ALIGN.LEFT
         for r in para.runs:
-            r.font.name = "Roboto"; r.font.bold = True; r.font.color.rgb = RGB(color)
+            r.font.name = FONT; r.font.bold = True; r.font.color.rgb = RGB(color)
 
 
 def chip(slide, x, y, w, h, text, status=None, fill=None, color=None, size=8, name=None):
@@ -791,9 +795,49 @@ def build_standard_base(data, customer: str, logo_path: Path | None, output_path
 
 
 # ------------------------------------------------------------ orchestration
+def resolve_standard_theme(v2: dict) -> dict:
+    """The standard deck's dark, page and pale colours and its font: `v2.standard_theme` over DEFAULT_THEME."""
+    cfg = v2.get("standard_theme") or {}
+    unknown = set(cfg) - set(DEFAULT_THEME)
+    if unknown:
+        raise ValueError(f"deck_layout.yaml v2.standard_theme: unknown key(s) {sorted(unknown)}; "
+                         f"use {sorted(DEFAULT_THEME)}.")
+    theme = {**DEFAULT_THEME, **cfg}
+    for key in ("dark", "page", "pale"):
+        if not re.fullmatch(r"[0-9A-Fa-f]{6}", str(theme[key])):
+            raise ValueError(f"deck_layout.yaml v2.standard_theme.{key}: {theme[key]!r} is not a 6-digit hex colour "
+                             "(quote it in YAML, e.g. \"1E2A4A\").")
+        theme[key] = str(theme[key]).upper()
+    if not str(theme["font"]).strip():
+        raise ValueError("deck_layout.yaml v2.standard_theme.font is empty.")
+    return theme
+
+
+@contextmanager
+def standard_theme(theme: dict):
+    """Apply `theme` to the module's colour and font names for one build, then restore them. Status, chart and
+    accent colours (MINT and the tables built from it) are not themed, so their meaning never shifts."""
+    global DK, BG, PALE, FONT
+    saved = DK, BG, PALE, FONT
+    DK, BG, PALE, FONT = theme["dark"], theme["page"], theme["pale"], theme["font"]
+    try:
+        yield
+    finally:
+        DK, BG, PALE, FONT = saved
+
+
 def build_v2(checklist_path: Path, customer: str, output_path: Path, base_deck: Path | None,
              logo_path: Path | None = None, narrative_path: Path | None = None,
              standard_deck: bool = False) -> dict:
+    if not standard_deck:
+        return _build_v2(checklist_path, customer, output_path, base_deck, logo_path, narrative_path, False)
+    theme = resolve_standard_theme(common.load_config("deck_layout.yaml").get("v2", {}))
+    with standard_theme(theme):
+        return _build_v2(checklist_path, customer, output_path, base_deck, logo_path, narrative_path, True)
+
+
+def _build_v2(checklist_path: Path, customer: str, output_path: Path, base_deck: Path | None,
+              logo_path: Path | None, narrative_path: Path | None, standard_deck: bool) -> dict:
     section_config = common.load_config("section_names.yaml")
     layout_config = common.load_config("deck_layout.yaml")
     v2 = layout_config.get("v2", {})

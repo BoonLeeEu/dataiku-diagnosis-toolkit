@@ -7,6 +7,12 @@ adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.10.8] - 2026-10-25
+
+### Added
+
+- `v2.standard_theme` in `config/deck_layout.yaml`: the standard (unbranded) deck's dark, page and pale colours and its font are configurable. Omitted keys keep today's values (Dataiku green, Roboto), so existing output is unchanged. Hex values are validated, and unknown keys are rejected. Status, chart and accent colours are not themed, and the branded deck ignores the block.
+
 ## [0.10.7] - 2026-10-25
 
 ### Fixed

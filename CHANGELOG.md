@@ -10,6 +10,12 @@ vendored components (`skills/dataiku-diagnosis-reader/`, `mcp-server-review-gene
 
 ## [Unreleased]
 
+## [0.38.15] - 2026-10-25
+
+### Added
+
+- Review generator 0.10.8: `v2.standard_theme` in `config/deck_layout.yaml` sets the standard (unbranded) deck's colours and font; defaults are unchanged. Requested as UPS-002 by the `diagnosis_workbench` adaptation.
+
 ## [0.38.14] - 2026-10-25
 
 ### Fixed
