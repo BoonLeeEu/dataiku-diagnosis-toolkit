@@ -7,6 +7,16 @@ adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.10.7] - 2026-10-25
+
+### Fixed
+
+- The standard (unbranded) v2 deck opens in Keynote. python-pptx writes the notes master part but not its `<p:notesMasterIdLst>` entry, so the deck now declares it before saving. The 16:9 page no longer carries python-pptx's stale `type="screen4x3"` size label.
+
+### Added
+
+- `validate_deck.validate()` reports a notes master that `presentation.xml` does not declare, and a `screen4x3` size label on a page that is not 4:3. These pass python-pptx, so they were invisible to the earlier structural checks.
+
 ## [0.10.6] - 2026-10-15
 
 ### Changed

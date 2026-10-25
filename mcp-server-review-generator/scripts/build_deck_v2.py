@@ -23,6 +23,7 @@ from pptx import Presentation
 from pptx.dml.color import RGBColor
 from pptx.enum.shapes import MSO_SHAPE
 from pptx.enum.text import MSO_ANCHOR, PP_ALIGN
+from pptx.opc.constants import RELATIONSHIP_TYPE as RT
 from pptx.oxml.ns import qn
 from pptx.util import Inches, Pt
 
@@ -723,11 +724,35 @@ def edit_cover(slide, data):
                     para._p.getparent().remove(para._p)  # includes the generator-version line
 
 
+def declare_notes_master(prs):
+    """python-pptx creates the notes master part and its relationship when the first notes slide is
+    made, but never lists it in <p:notesMasterIdLst>. Keynote rejects that file, so add the entry
+    (ECMA-376 CT_Presentation order: sldMasterIdLst, notesMasterIdLst, handoutMasterIdLst, sldIdLst)."""
+    pres = prs.part._element
+    if pres.find(qn("p:notesMasterIdLst")) is not None:
+        return
+    rid = next((r.rId for r in prs.part.rels.values() if r.reltype == RT.NOTES_MASTER), None)
+    if rid is None:
+        return
+    lst = etree.SubElement(pres, qn("p:notesMasterIdLst"))
+    etree.SubElement(lst, qn("p:notesMasterId")).set(qn("r:id"), rid)
+    pres.find(qn("p:sldMasterIdLst")).addnext(lst)
+
+
+def clear_stale_size_type(prs):
+    """The python-pptx default template says sldSz type="screen4x3"; after resizing to 16:9 the label is wrong."""
+    sld_sz = prs.part._element.find(qn("p:sldSz"))
+    if sld_sz is not None and "type" in sld_sz.attrib and sld_sz.get("type") == "screen4x3":
+        if prs.slide_width * 3 != prs.slide_height * 4:
+            del sld_sz.attrib["type"]
+
+
 def build_standard_base(data, customer: str, logo_path: Path | None, output_path: Path) -> Path:
     """Write the two-slide cover + closing .pptx build_v2 starts from when there is no branding
     template: plain python-pptx, the v2 palette, and no Dataiku logo or brand claim. The cover says so."""
     prs = Presentation()
     prs.slide_width, prs.slide_height = Inches(STANDARD_SLIDE_SIZE[0]), Inches(STANDARD_SLIDE_SIZE[1])
+    clear_stale_size_type(prs)
     layout = {l.name: l for l in prs.slide_layouts}[STANDARD_LAYOUT]
 
     def dark_slide(title, size):
@@ -826,6 +851,7 @@ def build_v2(checklist_path: Path, customer: str, output_path: Path, base_deck: 
             lst.remove(e)
         for e in [keep_cover] + new_ids + [keep_end]:
             lst.append(e)
+        declare_notes_master(prs)
         output_path.parent.mkdir(parents=True, exist_ok=True)
         prs.save(str(output_path))
         slide_count = len(lst)

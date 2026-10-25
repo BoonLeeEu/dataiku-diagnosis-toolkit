@@ -10,6 +10,12 @@ vendored components (`skills/dataiku-diagnosis-reader/`, `mcp-server-review-gene
 
 ## [Unreleased]
 
+## [0.38.14] - 2026-10-25
+
+### Fixed
+
+- Review generator 0.10.7: the standard (unbranded) deck opens in Keynote. It now declares its notes master and drops the stale 4:3 size label, and `validate_deck` reports both. Reported as UPS-001 by the `diagnosis_workbench` adaptation; see `upstream-responses/diagnosis-workbench/`.
+
 ## [0.38.13] - 2026-10-15
 
 ### Added

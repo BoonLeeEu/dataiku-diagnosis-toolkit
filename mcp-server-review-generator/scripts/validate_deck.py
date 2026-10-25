@@ -76,6 +76,16 @@ def validate(pptx_path: Path) -> list[str]:
             if f'PartName="{slide_part}"' not in ct_xml:
                 problems.append(f"{target} has no [Content_Types].xml Override entry.")
 
+        # 2b. Strict readers (Keynote) reject notes parts the presentation does not declare, and a 4:3
+        # size label on a page that is not 4:3.
+        if any(n.startswith("ppt/notesMasters/") and n.endswith(".xml") for n in names) \
+                and "<p:notesMasterIdLst>" not in pres_xml:
+            problems.append("ppt/notesMasters/ exists but presentation.xml has no <p:notesMasterIdLst>; "
+                            "Keynote rejects the file.")
+        m = re.search(r'<p:sldSz cx="(\d+)" cy="(\d+)"[^>]*\btype="screen4x3"', pres_xml)
+        if m and int(m.group(1)) * 3 != int(m.group(2)) * 4:
+            problems.append('presentation.xml sldSz says type="screen4x3" but the page is not 4:3.')
+
         # 3. No leftover placeholder text on any slide actually included in the deck.
         included_slides = set()
         for rid in rids:

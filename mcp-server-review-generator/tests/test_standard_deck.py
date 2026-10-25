@@ -81,3 +81,31 @@ def test_base_deck_directory_single_pptx_and_errors(tmp_path):
     (tmp_path / "b.pptx").write_bytes(b"x")
     with pytest.raises(FileNotFoundError, match="a.pptx, b.pptx"):
         common.resolve_base_deck_file(tmp_path)
+
+
+def _presentation_xml(path):
+    import zipfile
+    with zipfile.ZipFile(path) as z:
+        return z.read("ppt/presentation.xml").decode("utf-8")
+
+
+def test_regression_v0_10_7_standard_deck_declares_notes_master(checklist_factory, tmp_path, monkeypatch):
+    """Keynote rejected a standard deck: notes master part present but not in notesMasterIdLst, 16:9 labelled 4:3."""
+    monkeypatch.setattr(mcp_server.common, "REPO_ROOT", tmp_path)
+    res = build(checklist_factory, tmp_path, allow_standard_deck=True)
+    xml = _presentation_xml(res["output_path"])
+    assert xml.count("<p:notesMasterIdLst>") == 1
+    assert xml.index("</p:sldMasterIdLst>") < xml.index("<p:notesMasterIdLst>") < xml.index("<p:sldIdLst>")
+    assert 'type="screen4x3"' not in xml
+    assert validate_deck.validate(res["output_path"]) == []
+
+
+def test_validate_flags_undeclared_notes_master_and_stale_size_label(checklist_factory, tmp_path, monkeypatch):
+    import build_deck_v2
+    monkeypatch.setattr(mcp_server.common, "REPO_ROOT", tmp_path)
+    monkeypatch.setattr(build_deck_v2, "declare_notes_master", lambda prs: None)
+    monkeypatch.setattr(build_deck_v2, "clear_stale_size_type", lambda prs: None)
+    res = build(checklist_factory, tmp_path, allow_standard_deck=True)
+    problems = validate_deck.validate(res["output_path"])
+    assert any("notesMasterIdLst" in p for p in problems)
+    assert any("screen4x3" in p for p in problems)
