@@ -10,6 +10,12 @@ vendored components (`skills/dataiku-diagnosis-reader/`, `mcp-server-review-gene
 
 ## [Unreleased]
 
+## [0.38.16] - 2026-10-26
+
+### Fixed
+
+- Review generator 0.10.9: the rule-derived Risk 2 slide picks the same section on every run; ties for most failing checks go to the earliest section in checklist order (it used to depend on `PYTHONHASHSEED`). Reported as UPS-003 by the `diagnosis_workbench` adaptation.
+
 ## [0.38.15] - 2026-10-25
 
 ### Added

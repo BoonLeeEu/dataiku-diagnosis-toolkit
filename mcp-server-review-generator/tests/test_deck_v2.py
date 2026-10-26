@@ -337,3 +337,12 @@ def test_fit_pt_shrinks_long_figures():
     assert fit_pt("98", 0.95, 24, 14) == 24
     assert 14 <= fit_pt("166847", 0.95, 24, 14) < 24
     assert fit_pt("12345678", 0.95, 24, 14) == 14
+
+
+def test_risk2_section_tie_goes_to_the_earliest_section():
+    import build_deck_v2
+    from types import SimpleNamespace as R
+    fails = [R(section="B"), R(section="B"), R(section="A"), R(section="A"), R(section="C")]
+    assert build_deck_v2.risk2_section(fails, ["A", "B", "C"]) == "A"
+    assert build_deck_v2.risk2_section(fails, ["C", "B", "A"]) == "B"
+    assert build_deck_v2.risk2_section(fails + [R(section="C")] * 2, ["A", "B", "C"]) == "C"

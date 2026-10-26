@@ -7,6 +7,12 @@ adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.10.9] - 2026-10-26
+
+### Fixed
+
+- The rule-derived Risk 2 slide (no `risk2` in the narrative) picks the same section on every run. When sections tie for most failing checks, the earliest in checklist order wins; before, the choice depended on `PYTHONHASHSEED`. Reported as UPS-003 by the `diagnosis_workbench` adaptation.
+
 ## [0.10.8] - 2026-10-25
 
 ### Added

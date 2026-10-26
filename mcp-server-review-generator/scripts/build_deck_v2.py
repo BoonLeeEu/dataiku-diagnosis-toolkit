@@ -410,6 +410,16 @@ def fallback_risk1(a):
             "fix": [{"text": clip(r.action or r.headline, 52), "id": r.id} for r in rows[:5]]}
 
 
+def risk2_section(fails, order):
+    """Section with the most failing checks; a tie goes to the section earliest in `order`
+    (set iteration order of strings varies per process, so it must not decide)."""
+    counts = {}
+    for r in fails:
+        counts[r.section] = counts.get(r.section, 0) + 1
+    rank = {name: i for i, name in enumerate(order)}
+    return max(counts, key=lambda s: (counts[s], -rank.get(s, len(rank))))
+
+
 def risk2_slide(d, a, narr):
     r2 = narr.get("risk2")
     if r2 is None:
@@ -417,7 +427,7 @@ def risk2_slide(d, a, narr):
         fails = [r for r in a.by_status("Fail") if r.id not in used]
         if not fails:
             return None
-        sec = max({r.section for r in fails}, key=lambda s: sum(1 for r in fails if r.section == s))
+        sec = risk2_section(fails, [name for name, _ in a.section_order])
         sel = [r for r in fails if r.section == sec]
         r2 = {"title": f"Risk 2: {len(sel)} failing checks in {sec}",
               "table": [{"id": r.id, "setting": clip(r.title, 38), "today": clip(r.headline, 50),
