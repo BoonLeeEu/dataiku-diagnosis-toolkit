@@ -52,10 +52,10 @@ The standard deck's colours and font are set by `v2.standard_theme` in `config/d
 `pale`, `font`; each optional, defaulting to the Dataiku green and Roboto). Status and accent colours are not themed.
 The branded deck ignores it.
 
-The per-section appendix findings tables list Fail, Partial and Needs Review items by default. `v2.detail_statuses` in
-the same file chooses the statuses (any of `Fail`, `Partial`, `Needs Review`, `Pass`; rows stay in that severity
-order). `[]` drops the tables, and the build then warns if Needs Review items are left without a row. Passed checks
-keep their own slide either way. Applies to the branded and standard decks.
+The per-section appendix findings tables list every Fail, Partial, Needs Review and Pass item by default (Not Applicable has its own slide).
+`v2.detail_statuses` in the same file chooses the statuses (rows stay in that severity order); list only
+`Fail`, `Partial` and `Needs Review` for open items alone. `[]` drops the tables, and the build then warns if Needs Review items are left without a row. Passed checks
+also keep their own slide. Applies to the branded and standard decks.
 
 ## Usage
 

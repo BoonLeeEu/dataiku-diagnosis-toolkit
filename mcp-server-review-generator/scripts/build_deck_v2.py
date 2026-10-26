@@ -646,11 +646,11 @@ DETAIL_STATUS_ORDER = ("Fail", "Partial", "Needs Review", "Pass")  # severity or
 
 
 def resolve_detail_statuses(v2: dict) -> list:
-    """Statuses shown in the appendix findings tables: `v2.detail_statuses`, default Fail, Partial, Needs Review.
+    """Statuses shown in the appendix findings tables: `v2.detail_statuses`, default all four.
     An empty list builds no findings tables. Not Applicable has its own slide."""
     cfg = v2.get("detail_statuses")
     if cfg is None:
-        return list(DETAIL_STATUS_ORDER[:3])
+        return list(DETAIL_STATUS_ORDER)
     if not isinstance(cfg, list):
         raise ValueError("deck_layout.yaml v2.detail_statuses: expected a list "
                          f"(any of {list(DETAIL_STATUS_ORDER)}), got {cfg!r}.")

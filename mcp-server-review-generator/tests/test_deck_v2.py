@@ -372,14 +372,20 @@ def _detail_build(checklist_factory, tmp_path, monkeypatch, statuses=None):
     return res, tables
 
 
-def test_detail_statuses_default_is_unchanged(checklist_factory, tmp_path, monkeypatch):
+def test_detail_statuses_default_lists_every_status_but_not_applicable(checklist_factory, tmp_path, monkeypatch):
     _, tables = _detail_build(checklist_factory, tmp_path, monkeypatch)
     ids = [i for _, rows in tables for i in rows]
-    assert sorted(ids) == ["ARCH-001", "ARCH-002", "SCALE-009", "SCALE-010", "SEC-001"]
-    assert "ARCH-003" not in ids and "SEC-009" not in ids
-    assert any(t.endswith("2 needs review") for t, _ in tables)
-    _, explicit = _detail_build(checklist_factory, tmp_path, monkeypatch, ["Fail", "Partial", "Needs Review"])
+    assert sorted(ids) == ["ARCH-001", "ARCH-002", "ARCH-003", "SCALE-009", "SCALE-010", "SEC-001", "SEC-009"]
+    assert "ARCH-004" not in ids  # Not Applicable keeps its own slide
+    assert any(t.endswith("2 needs review, 1 pass") for t, _ in tables)
+    _, explicit = _detail_build(checklist_factory, tmp_path, monkeypatch, ["Fail", "Partial", "Needs Review", "Pass"])
     assert explicit == tables
+
+
+def test_detail_statuses_can_restore_the_open_only_tables(checklist_factory, tmp_path, monkeypatch):
+    _, tables = _detail_build(checklist_factory, tmp_path, monkeypatch, ["Fail", "Partial", "Needs Review"])
+    ids = [i for _, rows in tables for i in rows]
+    assert "ARCH-003" not in ids and "SEC-009" not in ids
 
 
 def test_detail_statuses_pass_adds_pass_rows_last_in_each_section(checklist_factory, tmp_path, monkeypatch):

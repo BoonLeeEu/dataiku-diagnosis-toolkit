@@ -213,7 +213,7 @@
   {
     "slide": 13,
     "texts": [
-      "Architecture, Compute &amp; Infrastructure: 2 needs review",
+      "Architecture, Compute &amp; Infrastructure: 2 needs review, 1 pass",
       "ID",
       "Item",
       "Pri.",
@@ -231,13 +231,18 @@
       "Must",
       "Needs Review",
       "Backups unknown",
-      "Ask infra team for the schedule"
+      "Ask infra team for the schedule",
+      "ARCH-003",
+      "Title of ARCH-003",
+      "Must",
+      "Pass",
+      "-"
     ]
   },
   {
     "slide": 14,
     "texts": [
-      "Enterprise-grade Security, Permissions: 1 partial",
+      "Enterprise-grade Security, Permissions: 1 partial, 1 pass",
       "ID",
       "Item",
       "Pri.",
@@ -250,7 +255,13 @@
       "Partial",
       "Shared ceiling",
       "98 memory kills",
-      "Size limits; see SCALE-009"
+      "Size limits; see SCALE-009",
+      "SEC-009",
+      "Title of SEC-009",
+      "Must",
+      "Pass",
+      "Groups populated",
+      "-"
     ]
   },
   {

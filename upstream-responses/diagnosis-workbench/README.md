@@ -12,7 +12,7 @@ version and the answers to the open questions into its own `UPSTREAM.md` and iss
 | [UPS-001](UPS-001-response.md) Keynote rejects the standard deck | Valid bug | **Fixed** | plugin 0.38.14 (review generator 0.10.7) |
 | [UPS-002](UPS-002-response.md) Standard deck uses Dataiku palette and font | Valid enhancement | **Implemented** as `v2.standard_theme` config | plugin 0.38.15 (review generator 0.10.8) |
 | [UPS-003](UPS-003-response.md) Risk 2 slide section depends on hash seed | Valid bug | **Fixed** | plugin 0.38.16 (review generator 0.10.9) |
-| [UPS-004](UPS-004-response.md) Appendix findings tables fixed to open statuses | Valid enhancement | **Implemented** as `v2.detail_statuses` config | plugin 0.38.17 (review generator 0.10.10) |
+| [UPS-004](UPS-004-response.md) Appendix findings tables fixed to open statuses | Valid enhancement | **Implemented** as `v2.detail_statuses` config | plugin 0.38.17, default changed in 0.38.18 (review generator 0.10.10, 0.10.11) |
 
 ## What the workbench needs to do on adopting 0.38.15
 
@@ -28,4 +28,4 @@ version and the answers to the open questions into its own `UPSTREAM.md` and iss
 ## Where the fix is
 
 The review generator is vendored here from `github.com/boonleeeu-dataiku/dataiku-review-generator`. The fix was made
-there (0.10.7 and 0.10.8) and re-synced into `mcp-server-review-generator/`. 0.10.7 and 0.38.14 are pushed; 0.10.8 to 0.10.10 and 0.38.15 to 0.38.17 are committed locally, not pushed.
+there (0.10.7 and 0.10.8) and re-synced into `mcp-server-review-generator/`. 0.10.7 and 0.38.14 are pushed; 0.10.8 to 0.10.11 and 0.38.15 to 0.38.18 are committed locally, not pushed.

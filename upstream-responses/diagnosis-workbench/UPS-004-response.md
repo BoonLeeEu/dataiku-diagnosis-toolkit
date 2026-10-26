@@ -2,8 +2,8 @@
 
 | | |
 |---|---|
-| Verdict | **Valid enhancement. Implemented as a configurable status list; default unchanged.** |
-| Fixed in | `dataiku-diagnosis-toolkit` 0.38.17, bundling `dataiku-review-generator` 0.10.10 |
+| Verdict | **Valid enhancement. Implemented as a configurable status list. Pass rows are listed by default (0.38.18).** |
+| Fixed in | `dataiku-diagnosis-toolkit` 0.38.17 (review generator 0.10.10); default widened in 0.38.18 (0.10.11) |
 | Files changed | `scripts/build_deck_v2.py`, `config/deck_layout.yaml`, `README.md`, `tests/test_deck_v2.py`, `CHANGELOG.md` (in `mcp-server-review-generator/`) |
 | Reviewed | 2026-10-26, against v0.38.15 (`f099053`) |
 
@@ -16,10 +16,12 @@ The three-status default was deliberate (a Pass row has no action), so it stays 
 
 ```yaml
 v2:
-  detail_statuses: [Fail, Partial, "Needs Review"]   # the default; any of Fail, Partial, Needs Review, Pass
+  detail_statuses: [Fail, Partial, "Needs Review", Pass]   # the default from 0.38.18; any subset
 ```
 
-- Omitted, the key gives today's decks unchanged (tests compare the default and the explicit default).
+- Omitted, the key lists all four statuses. 0.38.17 defaulted to the three open statuses; the owner asked for Pass
+  to show by default, so 0.38.18 changed it. `[Fail, Partial, "Needs Review"]` gives the old output. Decks gain Pass
+  rows and may gain appendix slides.
 - Rows stay in severity order (Fail, Partial, Needs Review, Pass) whatever order the list is written in. The slide
   title counts follow the same list ("2 needs review, 1 pass").
 - Pass rows show the item's headline and evidence in Finding and `-` in Action.
@@ -30,7 +32,7 @@ v2:
 
 ## Answers to your open questions
 
-- **Pass rows in this table?** Yes, opt-in. The Passed checks slide keeps listing them either way.
+- **Pass rows in this table?** Yes, and on by default. The Passed checks slide keeps listing them either way.
 - **Empty list?** Allowed. The build adds a warning (`warnings` in the result) when `Needs Review` is not in the list
   and Needs Review items exist, since those rows would otherwise have no appendix entry.
 - **Per-status or on/off?** Per-status, as proposed.
@@ -43,5 +45,5 @@ the empty list and the default.
 
 ## What the workbench needs to do on adopting 0.38.17
 
-Bump the pin, set UPS-004 to "fixed in 0.38.17", and write the reviewer's choice into `v2.detail_statuses` in the
+Bump the pin, set UPS-004 to "fixed in 0.38.17, default widened in 0.38.18", and write the reviewer's choice into `v2.detail_statuses` in the
 config it supplies, the way it does `v2.standard_theme`. Surface the build's new warning if the list omits Needs Review.

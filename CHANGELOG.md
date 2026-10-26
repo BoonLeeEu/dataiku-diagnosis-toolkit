@@ -10,6 +10,12 @@ vendored components (`skills/dataiku-diagnosis-reader/`, `mcp-server-review-gene
 
 ## [Unreleased]
 
+## [0.38.18] - 2026-10-26
+
+### Changed
+
+- Review generator 0.10.11: `v2.detail_statuses` now defaults to Fail, Partial, Needs Review and Pass, so the appendix findings tables list passing checks too. Set `[Fail, Partial, Needs Review]` for the previous output. Decks gain Pass rows and may gain appendix slides.
+
 ## [0.38.17] - 2026-10-26
 
 ### Added

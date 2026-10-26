@@ -7,6 +7,12 @@ adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.10.11] - 2026-10-26
+
+### Changed
+
+- `v2.detail_statuses` now defaults to Fail, Partial, Needs Review and Pass, so the appendix findings tables list passing checks too (Pass rows follow the others in each section). Set `[Fail, Partial, Needs Review]` for the 0.10.9 output. Decks gain Pass rows and may gain appendix slides.
+
 ## [0.10.10] - 2026-10-26
 
 ### Added
