@@ -10,6 +10,12 @@ vendored components (`skills/dataiku-diagnosis-reader/`, `mcp-server-review-gene
 
 ## [Unreleased]
 
+## [0.38.17] - 2026-10-26
+
+### Added
+
+- Review generator 0.10.10: `v2.detail_statuses` in `config/deck_layout.yaml` chooses which statuses the appendix findings tables list (Fail, Partial, Needs Review, Pass; `[]` drops them). The default keeps today's decks. Requested as UPS-004 by the `diagnosis_workbench` adaptation.
+
 ## [0.38.16] - 2026-10-26
 
 ### Fixed

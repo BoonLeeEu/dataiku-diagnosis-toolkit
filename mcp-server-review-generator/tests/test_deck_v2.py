@@ -346,3 +346,69 @@ def test_risk2_section_tie_goes_to_the_earliest_section():
     assert build_deck_v2.risk2_section(fails, ["A", "B", "C"]) == "A"
     assert build_deck_v2.risk2_section(fails, ["C", "B", "A"]) == "B"
     assert build_deck_v2.risk2_section(fails + [R(section="C")] * 2, ["A", "B", "C"]) == "C"
+
+
+def _detail_build(checklist_factory, tmp_path, monkeypatch, statuses=None):
+    """Build a standard v2 deck, optionally with v2.detail_statuses set; returns (result, [(title, ids)])."""
+    from pptx import Presentation
+    import build_deck_v2
+    if statuses is not None:
+        real = common.load_config
+
+        def load(name):
+            cfg = real(name)
+            if name == "deck_layout.yaml":
+                cfg["v2"]["detail_statuses"] = statuses
+            return cfg
+        monkeypatch.setattr(common, "load_config", load)
+    out = tmp_path / "d.pptx"
+    res = build_deck_v2.build_v2(checklist_factory(sections()), "Acme", out, None, standard_deck=True)
+    tables = []
+    for s in Presentation(str(out)).slides:
+        for sh in s.shapes:
+            if sh.name == "Detail table":
+                tables.append((s.shapes.title.text_frame.text,
+                               [r.cells[0].text for r in list(sh.table.rows)[1:]]))
+    return res, tables
+
+
+def test_detail_statuses_default_is_unchanged(checklist_factory, tmp_path, monkeypatch):
+    _, tables = _detail_build(checklist_factory, tmp_path, monkeypatch)
+    ids = [i for _, rows in tables for i in rows]
+    assert sorted(ids) == ["ARCH-001", "ARCH-002", "SCALE-009", "SCALE-010", "SEC-001"]
+    assert "ARCH-003" not in ids and "SEC-009" not in ids
+    assert any(t.endswith("2 needs review") for t, _ in tables)
+    _, explicit = _detail_build(checklist_factory, tmp_path, monkeypatch, ["Fail", "Partial", "Needs Review"])
+    assert explicit == tables
+
+
+def test_detail_statuses_pass_adds_pass_rows_last_in_each_section(checklist_factory, tmp_path, monkeypatch):
+    _, tables = _detail_build(checklist_factory, tmp_path, monkeypatch, ["Pass", "Needs Review"])
+    assert any(t.endswith("2 needs review, 1 pass") and rows == ["ARCH-001", "ARCH-002", "ARCH-003"] for t, rows in tables)
+    assert any(rows == ["SEC-009"] and t.endswith("1 pass") for t, rows in tables)
+    assert "SCALE-009" not in [i for _, rows in tables for i in rows]
+
+
+def test_detail_statuses_empty_drops_the_tables_and_warns_about_needs_review(checklist_factory, tmp_path, monkeypatch):
+    import validate_deck
+    res, tables = _detail_build(checklist_factory, tmp_path, monkeypatch, [])
+    assert tables == [] and validate_deck.validate(res["output_path"]) == []
+    assert any("leaves out Needs Review" in w for w in res["warnings"])
+    res, _ = _detail_build(checklist_factory, tmp_path, monkeypatch, ["Fail", "Partial", "Needs Review"])
+    assert not any("leaves out Needs Review" in w for w in res["warnings"])
+
+
+@pytest.mark.parametrize("value, message", [
+    ("Fail", "expected a list"),
+    (["Fail", "Passed"], "unknown status"),
+    (["Not Applicable"], "unknown status"),
+])
+def test_detail_statuses_rejects_bad_config(value, message):
+    import build_deck_v2
+    with pytest.raises(ValueError, match=message):
+        build_deck_v2.resolve_detail_statuses({"detail_statuses": value})
+
+
+def test_detail_statuses_keep_severity_order_whatever_the_config_order():
+    import build_deck_v2
+    assert build_deck_v2.resolve_detail_statuses({"detail_statuses": ["Pass", "Fail"]}) == ["Fail", "Pass"]

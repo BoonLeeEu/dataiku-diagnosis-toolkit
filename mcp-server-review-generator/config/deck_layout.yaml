@@ -47,6 +47,9 @@ cell_char_limits:
 v2:
   detail_max_rows: 7        # hard cap on rows per appendix findings slide
   passed_title_chars: 45    # Passed-checks slide: truncate titles to this
+  # Statuses listed in the per-section appendix findings tables, any of Fail, Partial, Needs Review, Pass (shown in
+  # that order). Omit for the default below; [] drops the tables. Passed checks also keep their own slide.
+  detail_statuses: [Fail, Partial, "Needs Review"]
   # Look of the standard (unbranded) deck only; the branded deck takes its look from the template. Every key is
   # optional and defaults to the values below, which are the Dataiku green and Roboto. Status, chart and accent
   # colours are not themed. Quote the hex values.

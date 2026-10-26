@@ -7,6 +7,12 @@ adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.10.10] - 2026-10-26
+
+### Added
+
+- `v2.detail_statuses` in `config/deck_layout.yaml` chooses the statuses listed in the per-section appendix findings tables (any of Fail, Partial, Needs Review, Pass). The default is Fail, Partial, Needs Review, so existing decks are unchanged. Pass rows follow the other rows in each section, with `-` as the action. An empty list drops the tables, and the build warns when that leaves Needs Review items without a row. Invalid values are rejected with the key named. Requested as UPS-004 by the `diagnosis_workbench` adaptation.
+
 ## [0.10.9] - 2026-10-26
 
 ### Fixed

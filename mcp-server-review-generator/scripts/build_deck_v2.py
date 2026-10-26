@@ -642,9 +642,28 @@ def passed_slide(d, a, v2):
         tb(s, cx, 1.92, w - 0.1, 3.2, paras, name=f"Passed list {k + 1}")
 
 
+DETAIL_STATUS_ORDER = ("Fail", "Partial", "Needs Review", "Pass")  # severity order of the appendix findings rows
+
+
+def resolve_detail_statuses(v2: dict) -> list:
+    """Statuses shown in the appendix findings tables: `v2.detail_statuses`, default Fail, Partial, Needs Review.
+    An empty list builds no findings tables. Not Applicable has its own slide."""
+    cfg = v2.get("detail_statuses")
+    if cfg is None:
+        return list(DETAIL_STATUS_ORDER[:3])
+    if not isinstance(cfg, list):
+        raise ValueError("deck_layout.yaml v2.detail_statuses: expected a list "
+                         f"(any of {list(DETAIL_STATUS_ORDER)}), got {cfg!r}.")
+    bad = [x for x in cfg if x not in DETAIL_STATUS_ORDER]
+    if bad:
+        raise ValueError(f"deck_layout.yaml v2.detail_statuses: unknown status {bad}; use any of "
+                         f"{list(DETAIL_STATUS_ORDER)} (Not Applicable has its own slide).")
+    return [x for x in DETAIL_STATUS_ORDER if x in cfg]
+
+
 def detail_slides(d, a, v2, data):
     raw_items = data_checks.items_by_id(data)
-    order = {"Fail": 0, "Partial": 1, "Needs Review": 2}
+    order = {st: i for i, st in enumerate(resolve_detail_statuses(v2))}
     widths = [0.85, 1.75, 0.5, 0.8, 3.3, 2.0]
     top, bottom, hdr = 1.1, 5.0, 0.28
     cap = v2.get("detail_max_rows", 7)
@@ -674,7 +693,7 @@ def detail_slides(d, a, v2, data):
                     chunks.append(cur); cur, acc = [], 0.0
             chunks.append(cur)
         c = a.section_counts(disp)
-        bits = [f"{c[k]} {k.lower()}" for k in ("Fail", "Partial", "Needs Review") if c[k]]
+        bits = [f"{c[k]} {k.lower()}" for k in order if c[k]]
         for ci, ch in enumerate(chunks):
             suffix = f" ({ci + 1}/{len(chunks)})" if len(chunks) > 1 else ""
             s = d.cream(f"{clip(disp, 40)}: {', '.join(bits)}{suffix}", 18)
@@ -853,9 +872,13 @@ def _build_v2(checklist_path: Path, customer: str, output_path: Path, base_deck:
     v2 = layout_config.get("v2", {})
     data = read_checklist.read_checklist(checklist_path, section_config)
     ordered = section_names.order_sections(data.sheet_tab_names, section_config)
+    detail_statuses = resolve_detail_statuses(v2)
     a = da.analyze(data, ordered, v2)
     narr = {}
     warnings = data_checks.check_data_consistency(data, ordered, section_config, style="v2") + list(a.warnings)
+    if a.counts["Needs Review"] and "Needs Review" not in detail_statuses:
+        warnings.append(f"v2.detail_statuses leaves out Needs Review, so the {a.counts['Needs Review']} Needs Review "
+                        "item(s) have no appendix findings row.")
     if not narrative_path:
         found = narr_mod.default_path(checklist_path)
         narrative_path = found if found.exists() else None
