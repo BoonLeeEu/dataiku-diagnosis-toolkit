@@ -2,7 +2,8 @@
 
 Replies to the issue write-ups in
 `github.com/boonleeeu-dataiku/diagnosis_workbench` → `code_studio-versioned/diagnosis-workbench/upstream-issues/`,
-reviewed against `dataiku-diagnosis-toolkit` v0.38.13 (commit `5b39adb`) on 2026-10-25.
+reviewed against `dataiku-diagnosis-toolkit` v0.38.13 (commit `5b39adb`) on 2026-10-25 (UPS-001, UPS-002) and
+v0.38.15 (commit `f099053`) on 2026-10-26 (UPS-003, UPS-004).
 
 Each file answers one issue and is written to stand alone, so the workbench repo can copy the status, the fixed-in
 version and the answers to the open questions into its own `UPSTREAM.md` and issue files.
@@ -25,7 +26,24 @@ version and the answers to the open questions into its own `UPSTREAM.md` and iss
    `screen4x3` label on a non-4:3 page. A workbench pipeline that treats `structural_problems` as fatal will start
    catching this class itself.
 
+## What the workbench needs to do on adopting 0.38.18
+
+Pin to `v0.38.18`, which carries everything above.
+
+4. UPS-003: set to "fixed in 0.38.16". The Risk 2 slide now picks the same section on every run (ties go to the
+   earliest section in checklist order), so the Risk 2 title normalisation in
+   `test_pinned_toolkit_deck_follows_the_slide_arrangement` can be dropped; keeping it is harmless.
+5. UPS-004: set to "fixed in 0.38.17, default widened in 0.38.18". `v2.detail_statuses` in `deck_layout.yaml` chooses
+   the statuses in the appendix findings tables. **The default is now all of Fail, Partial, Needs Review and Pass**,
+   so decks built from an unchanged checklist gain Pass rows and may gain appendix slides. To keep the old output,
+   write `[Fail, Partial, "Needs Review"]` into the config the workbench supplies, as it does for
+   `v2.standard_theme`. `[]` drops the tables and the build then warns if Needs Review items lose their row.
+   `Not Applicable` is not accepted there; it keeps its own slide.
+6. Expect the golden or visual checks of any deck built from the default config to change (more rows, titles such as
+   "2 needs review, 1 pass").
+
 ## Where the fix is
 
-The review generator is vendored here from `github.com/boonleeeu-dataiku/dataiku-review-generator`. The fix was made
-there (0.10.7 and 0.10.8) and re-synced into `mcp-server-review-generator/`. 0.10.7 and 0.38.14 are pushed; 0.10.8 to 0.10.11 and 0.38.15 to 0.38.18 are committed locally, not pushed.
+The review generator is vendored here from `github.com/boonleeeu-dataiku/dataiku-review-generator`. The fixes were made
+there (0.10.7 to 0.10.11) and re-synced into `mcp-server-review-generator/`. All of them, the generator tags `v0.10.7`
+to `v0.10.11` and the toolkit tags `v0.38.15` to `v0.38.18`, are pushed.
