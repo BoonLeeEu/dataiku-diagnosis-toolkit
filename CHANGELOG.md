@@ -10,6 +10,20 @@ vendored components (`skills/dataiku-diagnosis-reader/`, `mcp-server-review-gene
 
 ## [Unreleased]
 
+## [0.39.0] - 2026-10-28
+
+### Added
+
+- New skill `dataiku-diagnosis-log-review`: scans a bundle's major logs (backend, frontend, nginx, ipython, eventserver, supervisord, install, code-environment builds, the kernel log, thread dump and JVM crash dumps) for errors and warnings, judges each finding against a curated catalogue (`references/error-catalogue.md`, 29 entries with signature, cause, confidence rule, what to check next and numbered mitigation steps), and writes one workbook through the new `write_log_workbook` tool: an Overview sheet that summarises every log and links each finding to its row, plus one sheet per log. A cause the evidence does not support is marked Unknown with what to check and where.
+- Reader 0.23.0: `scripts/logscan.py` groups each log's errors and warnings by normalised pattern with count, window, `file:line` of the first sighting and a masked excerpt (emails, addresses, user names, project and scenario ids, hosts, credentials and licence file names replaced). `references/logs.md` documents each log's format, rotation order and signatures. `orient.sh` lists the `run/` logs with sizes. Corrects the runtime reference: `nginx.log` is an error log only, `frontend.log` is the browser-side UI log.
+- Review generator 0.11.0: the `write_log_workbook` tool. It refuses a finding with an unknown level or confidence, a Confirmed/Likely one without a root cause and mitigation, an Unknown one without a next check, or text that still holds an email address, IP address, credential or licence file name. The saved file is re-read and every Overview link must land on its finding's row before it replaces the old one.
+- Tests: `tests/test_logscan.py` (on a synthetic bundle built by `tests/lib/log_bundle.py` that plants identifiers the output must never contain), `tests/test_log_review_contracts.py` (catalogue entries complete, documented layout equals the tool's), and the new skill under `tests/test_skill_boundaries.py`.
+
+### Known limits
+
+- The bundle holds no job, scenario-run or audit logs, so the workbook does not cover them.
+- Masking is best effort; a person must read the excerpts before the workbook leaves the machine.
+
 ## [0.38.18] - 2026-10-26
 
 ### Changed

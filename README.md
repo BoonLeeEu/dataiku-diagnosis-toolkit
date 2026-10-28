@@ -30,11 +30,17 @@ spreadsheet.
   appendix of Fail / Partial / Needs Review rows), with a `narrative.json` that the agent drafts
   from each bundle's own checklist on every run (the tool validates it against item statuses). A build
   without a narrative, possible only from the plain script, falls back to generic text derived from cells.
+- **`skills/dataiku-diagnosis-log-review/`** — reads the bundle's major logs for errors and warnings, gives each a
+  root cause (or what to check next, and where) and numbered mitigation steps, and writes one workbook: an
+  `Overview` sheet that summarises every log and links each finding to its row, plus one sheet per log. Uses the
+  reader's `scripts/logscan.py` (grouped, masked findings) and the `write_log_workbook` tool below; its judgment
+  lives in `references/error-catalogue.md`. Authored directly in this repo; separate from the checklist review, which
+  it does not depend on.
 - **`codex-skills/dataiku-codex-workflow/`** — Codex-only companion skill that translates tool and
   file-access instructions for Codex (see [Codex plugin](#codex-plugin)).
 - **`mcp-server-review-generator/`** — a local Python MCP server exposing
-  `build_platform_review_deck`, `validate_deck`, `analyze_checklist` and `write_summary` tools that generate/validate the deck and
-  return the facts its narrative must cite. Vendored
+  `build_platform_review_deck`, `validate_deck`, `analyze_checklist`, `write_summary` and `write_log_workbook` tools that generate/validate the deck,
+  return the facts its narrative must cite, and write the log-review workbook. Vendored
   from a separate upstream repo — see [Versioning & maintenance](#versioning--maintenance) below.
 
 ## Installation
@@ -185,7 +191,7 @@ This plugin's own release is versioned via `.claude-plugin/plugin.json`'s top-le
 upstream repo (`dataiku-diagnosis-reader`), which is its actual source of truth and versions
 it independently (see its `CHANGELOG.md` and `SKILL.md`'s `version` frontmatter). `mcp-server-review-generator/` is likewise vendored,
 from `dataiku-review-generator`, versioned independently via its own `VERSION`/`CHANGELOG.md`.
-`skills/dataiku-diagnosis-checklist-review/` and `skills/dataiku-review-deck-builder/` are
+`skills/dataiku-diagnosis-checklist-review/`, `skills/dataiku-review-deck-builder/` and `skills/dataiku-diagnosis-log-review/` are
 authored directly here and have no separate version. See `CLAUDE.md` for how to re-sync this
 plugin with upstream changes.
 

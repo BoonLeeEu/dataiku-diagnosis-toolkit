@@ -92,3 +92,23 @@ def test_write_summary_tool_surfaces_input_errors_as_tool_errors(checklist_facto
         mcp_server.write_summary(
             checklist_path=str(checklist_factory()), reviewer="r", bundle="b", key_points={}, recommendations=["x"],
         )
+
+
+def test_write_log_workbook_tool_writes_and_reports(tmp_path):
+    out = tmp_path / "log_review.xlsx"
+    res = mcp_server.write_log_workbook(
+        output_path=str(out), bundle="b", reviewer="r",
+        logs=[{"id": "backend", "label": "backend.log", "findings": [{
+            "id": "backend-001", "level": "ERROR", "pattern": "[dku.x] failed", "count": 2,
+            "confidence": "Unknown", "check_next": ["Look at backend.log around the first sighting"]}]}],
+    )
+    assert out.exists() and res["sheets"] == ["Overview", "backend.log"] and res["by_confidence"]["Unknown"] == 1
+
+
+def test_write_log_workbook_tool_surfaces_input_errors_as_tool_errors(tmp_path):
+    with pytest.raises(ToolError, match="confidence"):
+        mcp_server.write_log_workbook(
+            output_path=str(tmp_path / "x.xlsx"), bundle="b", reviewer="r",
+            logs=[{"id": "backend", "findings": [{"id": "b-1", "level": "ERROR", "pattern": "p", "count": 1,
+                                                    "confidence": "Maybe"}]}],
+        )

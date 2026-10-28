@@ -9,6 +9,20 @@ adheres to [Semantic Versioning](https://semver.org/). The version tracked here 
 Versioning is scoped to this directory (`dataiku-diagnosis-reader/`) only, since it's the unit
 that gets copied/symlinked into a skills root independently of the rest of this repo.
 
+## [0.23.0] - 2026-10-28
+
+### Added
+
+- `scripts/logscan.py`: errors and warnings of the major logs (`backend`, `frontend`, `nginx`, `ipython`, `eventserver`, `supervisord`, `install`, `install-impersonation`, `codeenv`, `dmesg`, `stacks`, `hs_err`), grouped by normalised pattern with count, first/last timestamp, `file:line` of the first sighting and a masked excerpt. Streams every file (about 20s for a design node). Catches serious supervisord events that log at INFO/WARN.
+- `references/logs.md`: the line format, level token, rotation order and error signatures of each log, and what the masking replaces.
+- `orient.sh` lists the `run/*.log*` files with sizes.
+
+### Fixed
+
+- `nginx.log` is an error log only (no access lines); the runtime reference said "access/error".
+- `frontend.log.N` is the browser-side UI log, and `.0` is the newest rotation.
+- Code-env build log names (`createPythonEnv.log`, `updateEnvAccordingToSpec.log`, ...) as observed on a design node.
+
 ## [0.22.0] - 2026-10-15
 
 ### Added

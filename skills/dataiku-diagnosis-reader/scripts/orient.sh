@@ -108,6 +108,17 @@ if [ -n "${mirror:-}" ]; then
   fi
 
   echo
+  echo "-- Logs in run/ (scan them with scripts/logscan.py) --"
+  if [ -d "$mirror/run" ]; then
+    find "$mirror/run" -maxdepth 1 -type f \( -name '*.log' -o -name '*.log.[0-9]*' \) ! -name 'hs_err_pid*' 2>/dev/null | sort | while read -r f; do
+      kb=$(du -k "$f" 2>/dev/null | cut -f1)
+      printf "  %6s  %s\n" "$(human_size "${kb:-0}")" "${f#$mirror/}"
+    done
+  else
+    echo "  [absent]  run/"
+  fi
+
+  echo
   echo "-- Bundle-activation signals (common on automation, rare on design) --"
   bundle_count=$(find "$mirror/config/projects" -maxdepth 2 -name active-bundle.json 2>/dev/null | wc -l | tr -d ' ')
   echo "  active-bundle.json found under config/projects/: $bundle_count"

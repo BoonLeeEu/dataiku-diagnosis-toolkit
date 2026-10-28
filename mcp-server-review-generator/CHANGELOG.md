@@ -7,6 +7,13 @@ adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-10-28
+
+### Added
+
+- `write_log_workbook` MCP tool (`scripts/write_log_workbook.py`): writes a log-review workbook with an Overview sheet (scan result and totals per log, then every finding with severity, confidence, likely root cause and a link to its row) and one sheet per scanned log (grouped error/warning patterns, masked excerpt, root cause, confidence, what to check next, numbered mitigation steps). A log the bundle lacks is listed on the Overview with no sheet; a clean log gets a sheet that says so.
+- Refuses, before touching any file, a finding with an unknown level or confidence, a Confirmed/Likely finding without a root cause and mitigation, an Unknown one without a next check, or text that still holds an email address, IP address, credential or licence file name. The saved file is re-read, and every Overview link must land on its finding's row, before it replaces the old one.
+
 ## [0.10.11] - 2026-10-26
 
 ### Changed

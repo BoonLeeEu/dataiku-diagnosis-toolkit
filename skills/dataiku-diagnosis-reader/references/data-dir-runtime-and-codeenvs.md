@@ -14,7 +14,7 @@ design nodes; may be empty on an automation node):
   `absl-py==2.3.1`) — **this is the answer to "what packages/versions are installed in env X"**,
   not `spec/requirements.txt`
 - `actual/info.json` — build metadata (often minimal)
-- `code-envs/logs/python/<env>/*.log` — install/build logs (pip resolution errors, etc.)
+- `code-envs/logs/python/<env>/*.log` — install/build logs (pip resolution errors, etc.): `createPythonEnv.log`, `updateEnvAccordingToSpec.log`, `installJupyterSupport.log`, `removeJupyterSupport.log`, `fetchDetails.log`. Pip transcripts with no timestamps or level token
 - Often has an internal `.git` history tracking env spec changes over time
 
 **`acode-envs/python/<name>/`** — "activated code-envs", auto-created when a bundle activates on a
@@ -60,11 +60,11 @@ records install/enable state on *any* node type (see `references/data-dir-config
 | File | Contains | Notes |
 |---|---|---|
 | `backend.log` (+ `.1`/`.2` rotated) | Main DSS backend Java process log: API call traces (`[dku.tracing] Start call: ... user=...`), job/scenario status, exceptions | **Primary app log** for "what happened and when" |
-| `frontend.log.0`-`.4` | Node/JS frontend server logs | |
-| `nginx.log` (+ rotated) | Reverse-proxy access/error log | |
+| `frontend.log.0`-`.4` | Browser-side UI log (one DEBUG pair per API call) | `.0` is newest, `.4` oldest; no unnumbered file |
+| `nginx.log` (+ rotated) | Reverse-proxy **error** log (no access lines); may open with `nginx: [alert] could not open error log file` | Mostly 404 noise; see `references/logs.md` |
 | `ipython.log` (+ rotated) | Jupyter/ipython gateway process log | |
 | `eventserver.log` (+ rotated) | Usage-tracking/telemetry log | |
-| `supervisord.log` | Process-manager log: start/stop/restart events for backend/frontend/nginx/ipython/eventserver | |
+| `supervisord.log` | Process-manager log: start/stop/restart events for backend/frontend/nginx/ipython/eventserver | Crashes (`exited ... not expected`, `gave up ... entered FATAL state`) are logged at INFO/WARN, not ERROR |
 | `install.log` | Full install/upgrade transcript | Can be ~90-100MB+; never load whole |
 | `install-impersonation.log` | `dssadmin install-impersonation` output — sets up the OS-user impersonation wrapper referenced by `install.ini`'s `[mus] exec_wrapper_location` | Most operationally relevant for scheduled/unattended job execution (automation) |
 | `hs_err_pid<N>.log` | **JVM fatal crash dumps** (HotSpot error logs) — native-mmap OOM failures, thread/heap/register dump | Primary source for crash/OOM root-cause; cross-reference with `dmesg.txt` (OOM-killer) and `cgroups_usage.txt` (which project/activity was responsible). Not observed in the one automation sample surveyed — absence doesn't rule it out generally |
@@ -74,6 +74,8 @@ records install/enable state on *any* node type (see `references/data-dir-config
 | `audit/audit.log.N` | Rotated audit trail (user actions) | Often ~100MB each. **Not observed as real content in any of the 3 samples surveyed** — only as path/size entries in `datadir_listing.txt`. Don't assume it's ever mirrored as content; verify per-bundle before promising to read it |
 
 ## Reading the logs
+
+For errors and warnings across all the logs, use `scripts/logscan.py` and `references/logs.md` (per-log formats, signatures, masking).
 
 **Line format.** `backend.log` lines look like `[2026/07/21-08:56:51.095] [thread] [LEVEL] [logger]
 - message`: the level is a **bracketed token mid-line**, after the timestamp and thread name. Match

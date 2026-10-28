@@ -52,8 +52,8 @@ which have none.
   give) only. `tests/test_skill_boundaries.py` enforces this; extend its `READER_OWNED_TERMS` when
   a new layout term shows up.
 
-- **`skills/dataiku-diagnosis-checklist-review/`** and **`skills/dataiku-review-deck-builder/`**
-  are authored directly in this repo. Neither has an upstream, and neither currently carries an
+- **`skills/dataiku-diagnosis-checklist-review/`**, **`skills/dataiku-review-deck-builder/`** and
+  **`skills/dataiku-diagnosis-log-review/`** are authored directly in this repo. None has an upstream, and none currently carries an
   independent `version`/`CHANGELOG.md` — don't add versioning to either speculatively; that
   decision is deferred until one needs to be shared/versioned on its own.
 
@@ -62,6 +62,12 @@ which have none.
   the gitignored, user-supplied/sample assets under `mcp-server-review-generator/resources/`
   (see below), this one is **tracked in git**: it's not customer data, it's small, and it must
   ship with the plugin for the default to work for anyone installing it via the marketplace.
+
+  `skills/dataiku-diagnosis-log-review/` is built to be extractable: it depends on the reader (`scripts/logscan.py`,
+  `references/logs.md`) and on the generator's `write_log_workbook` tool only, never on the checklist or deck code.
+  Its `references/error-catalogue.md` holds judgment (cause, confidence, mitigation); log formats, masking and
+  how to read a log belong in the reader. When a new log signature turns up, add its layout to the reader upstream
+  and its entry to the catalogue; `tests/test_log_review_contracts.py` checks the entries are complete.
 
 - **`mcp-server-review-generator/`** is **vendored** from a separate upstream repo,
   `github.com/boonleeeu-dataiku/dataiku-review-generator`, which is its actual source of truth.

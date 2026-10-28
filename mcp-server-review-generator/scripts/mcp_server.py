@@ -302,6 +302,55 @@ def write_summary(
 
 @mcp.tool()
 @_surface_errors
+def write_log_workbook(
+    output_path: str,
+    bundle: str,
+    reviewer: str,
+    logs: list[dict[str, Any]],
+    node_version: str = "",
+    diagnosis_generated: str = "",
+) -> dict[str, Any]:
+    """Write a log-review workbook: an Overview sheet that summarises every scanned log's
+    findings and links each to its row, plus one sheet per log with the grouped errors and
+    warnings, a masked excerpt, the root cause, what to check next, and mitigation steps.
+
+    Args:
+        output_path: Where to write the .xlsx (required). A relative path is resolved against
+            this repo's root. An existing file is replaced.
+        bundle: Diagnosis bundle name (required).
+        reviewer: Reviewer name (required).
+        logs: One entry per log the scan covered, in the order to show them. Each is
+            {id, label, present, searched, note, files: [{first, last}], totals: {WARN, ERROR,
+            FATAL}, findings: [...]}. present=false lists the log on the Overview as not in the
+            bundle (no sheet). Each finding is {id, level (WARN | ERROR | FATAL), pattern,
+            count, first, last, first_seen_at, excerpt: [masked lines], root_cause, confidence
+            (Confirmed | Likely | Unknown), check_next: [what to look at, and where],
+            mitigation: [steps], notes}. Confirmed and Likely need root_cause and mitigation;
+            Unknown needs check_next. Excerpts must already be masked: the call fails if one
+            holds an email, IP address, credential or licence file name.
+        node_version: e.g. "Design node / 14.4.3".
+        diagnosis_generated: Date as in the bundle.
+
+    Returns:
+        A dict with output_path, sheets, logs_with_findings, logs_clean, logs_not_in_bundle,
+        findings, by_level and by_confidence. Fails with a message naming the problem without
+        touching any file; the saved workbook is re-read (every Overview link must land on its
+        finding's row) before it replaces the old one.
+    """
+    import write_log_workbook as write_log_workbook_lib
+
+    return write_log_workbook_lib.write_log_workbook(
+        _resolve(output_path),
+        bundle=bundle,
+        reviewer=reviewer,
+        logs=logs,
+        node_version=node_version,
+        diagnosis_generated=diagnosis_generated,
+    )
+
+
+@mcp.tool()
+@_surface_errors
 def analyze_checklist(checklist_path: str) -> dict[str, Any]:
     """Read a completed checklist and return the facts a v2 narrative must cite,
     so Claude can draft <checklist_stem>_narrative.json that validates first time.

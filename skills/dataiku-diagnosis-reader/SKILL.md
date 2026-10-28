@@ -1,7 +1,7 @@
 ---
 name: "dataiku-diagnosis-reader"
 description: "Navigate and interpret an extracted Dataiku DSS diagnosis.zip support bundle (also: DSS diagnostic export, a folder named dku_diagnosis_*) to answer troubleshooting questions on instance configuration, crashes/OOMs, performance, users, connections, projects, code environments, plugins and logs, without re-deriving the bundle layout. Use whenever the user provides or asks about a Dataiku diagnosis bundle."
-version: 0.22.0
+version: 0.23.0
 ---
 
 # Dataiku DSS diagnosis.zip reader
@@ -109,5 +109,6 @@ output lands in the transcript.
 - `references/data-dir-config.md` — the `config/` metastore, `projects/<KEY>/`, resource governance (cgroups, containers, K8s,
   Spark) and identifying the internal database.
 - `references/data-dir-runtime-and-codeenvs.md` — `run/` logs, `code-envs/`/`acode-envs/`, `install-support/`, `plugins/dev/`.
+- `references/logs.md` — per-log line formats, error signatures, masking, and `scripts/logscan.py` (errors and warnings of every major log, grouped).
 - `references/lookup-table.md` — the full "where do I find X" index.
 - `references/limitations.md` — verified scope, known content gaps, large-file hazards.
