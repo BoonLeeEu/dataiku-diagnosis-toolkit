@@ -1,11 +1,11 @@
 ---
 name: dataiku-codex-workflow
-description: Apply Codex tool and file-access conventions when using this plugin's Dataiku diagnosis reader, checklist review, or Platform Review deck builder in Codex. Use alongside the corresponding Dataiku task skill, not for unrelated Dataiku work.
+description: Apply Codex tool and file-access conventions when using this plugin's Dataiku diagnosis reader, checklist review, log review, or Platform Review deck builder in Codex. Use alongside the corresponding Dataiku task skill, not for unrelated Dataiku work.
 ---
 
 # Dataiku toolkit in Codex
 
-Use the task-specific skill in this plugin for the actual review or deck workflow. This companion only translates host-specific instructions that appear in those skills.
+Use the task-specific skill in this plugin for the actual review or deck workflow, including log review. This companion only translates host-specific instructions that appear in those skills.
 
 - There is no reader MCP server: when the bundle is accessible to Codex's shell, run the reader skill's `scripts/orient.sh <bundle_root>` for triage and `scripts/peek.py` to inspect config JSON. If the bundle is on a separately linked computer and the script file is unavailable there, follow the reader skill's guidance to pipe `orient.sh` to that computer's shell; orient manually only if stdin cannot be passed. Follow its secret-handling guidance on that computer. The review generator MCP server provides `write_summary`, `analyze_checklist`, `build_platform_review_deck`, `validate_deck`, and `write_log_workbook` (the log-review workbook; the log-review skill also runs the reader's `scripts/logscan.py` with `python3 -I` in Codex's shell). Discover deferred tools using Codex's available tool discovery mechanism; the literal `ToolSearch` syntax in the original skills is only an example from another host. Use Codex's normal read/search tools for other bundle files, following the reader skill's secret and large-file guidance.
 - Before a review or deck, run the plugin's `scripts/preflight.sh` (pure bash) and obey its `TIER=` as the checklist and deck skills describe. A host without Python 3.10+ gets the workbook at most, never a deck.

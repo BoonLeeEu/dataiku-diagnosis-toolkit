@@ -1,7 +1,7 @@
 {
   "name": "dataiku-diagnosis-toolkit",
   "version": "0.39.0",
-  "description": "Review Dataiku DSS diagnosis bundles against checklists and generate Platform Review decks.",
+  "description": "Review Dataiku DSS diagnosis bundles, logs, and checklists, and generate Platform Review decks.",
   "author": {
     "name": "Boon Lee Eu"
   },
@@ -17,7 +17,7 @@
   "interface": {
     "displayName": "Dataiku Diagnosis Toolkit",
     "shortDescription": "Review Dataiku diagnostics and build review decks",
-    "longDescription": "Read Dataiku DSS diagnosis bundles, validate checklist workbooks, and generate customer-facing Platform Review decks using local MCP tools.",
+    "longDescription": "Read Dataiku DSS diagnosis bundles, review logs, validate checklist workbooks, and generate customer-facing Platform Review decks using local MCP tools.",
     "developerName": "Boon Lee Eu",
     "category": "Productivity",
     "capabilities": ["Read", "Write"],
