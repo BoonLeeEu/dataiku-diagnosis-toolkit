@@ -126,7 +126,7 @@ answering.
 |---|---|---|
 | Backend/API/job/scenario execution trace | `run/backend.log*` | Primary application log. Levels are bracketed (`[ERROR]`); record each file's first/last timestamp so counts carry a time window — see `references/data-dir-runtime-and-codeenvs.md` |
 | Cause of a JVM crash | `run/hs_err_pid*.log` header (`grep '^# '`, first ~20 lines) | OOM vs. segfault is stated there; never read the whole file |
-| Errors and warnings across all the major logs, grouped by pattern | `scripts/logscan.py <bundle_root>` | Streams every log, masks excerpts; formats and signatures in `references/logs.md` |
+| Errors and warnings across all the major logs, grouped by pattern | `scripts/logscan.py <bundle_root>` | Streams every log, masks excerpts; `--around TS --timeline` narrows to an incident; formats and signatures in `references/logs.md` |
 | Frontend errors | `run/frontend.log.*` | Browser-side UI log; mostly DEBUG |
 | Reverse-proxy errors | `run/nginx.log*` | Error log only, no access lines |
 | Jupyter/ipython gateway issues | `run/ipython.log*` | |

@@ -122,7 +122,8 @@ def test_clean_logs_report_zero_findings(logs):
 def test_install_log_finds_real_failures_not_the_yarn_noise_as_errors(logs):
     i = logs["install"]
     patterns = [f["pattern"] for f in i["findings"] if f["level"] == "ERROR"]
-    assert any("Traceback" in p for p in patterns) and any("Failed to migrate" in p for p in patterns)
+    assert any("Failed to migrate" in p for p in patterns)
+    assert not any(p.endswith("Traceback (most recent call last)") for p in patterns)  # the header is not a finding
     assert any("permission denied for schema" in p or "PSQLException" in p for p in patterns)
     assert by_pattern(i, "to launch YARN applications")["level"] == "WARN"  # quoted text is normalised away
 

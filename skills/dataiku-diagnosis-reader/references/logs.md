@@ -1,17 +1,36 @@
 # Reading the logs for errors and warnings
 
-Every log below is large (rotated files run to ~100MB, ~1GB per bundle). Never load one whole. Run
-`scripts/logscan.py <bundle_root>` once: it streams each file and returns, per log, the files with size and
-time window, WARN/ERROR/FATAL totals, and one finding per normalised message pattern (count, first/last
-timestamp, `file:line` of the first sighting, masked excerpt). `--log ID` limits it, `--top N` sets the findings
-kept per log (default 30), `--no-excerpts` drops all log text. About 20 seconds for a design node.
+The logs are large (rotated files ~100MB, ~1GB per bundle): never load one whole. Run `scripts/logscan.py <bundle_root>`.
+It streams each file once and returns, per log, the files (size, time window), WARN/ERROR/FATAL totals and one finding
+per normalised message pattern: count, first/last time, `file:line` of the first sighting, masked excerpt.
 
-Log ids: `backend`, `frontend`, `nginx`, `ipython`, `eventserver`, `supervisord`, `install`,
-`install-impersonation`, `codeenv`, `dmesg`, `stacks`, `hs_err`. A log the bundle lacks comes back
-`"present": false` with where it looked; absence is not evidence the log was clean.
+| Flag | Effect |
+|---|---|
+| `--log ID` | Only this log (repeatable). Ids: `backend`, `frontend`, `nginx`, `ipython`, `eventserver`, `supervisord`, `install`, `install-impersonation`, `codeenv`, `dmesg`, `stacks`, `hs_err` |
+| `--top N` | Findings kept per log (default 30); signature findings are never cut |
+| `--no-excerpts` | Patterns and counts only, no log text |
+| `--since` / `--until` | ISO time or date; a bare `--until` date means that whole day |
+| `--around TS --window 2h` | Shorthand for `TS` minus/plus the span (default 30m) |
+| `--timeline` | Adds `timeline.events`: signature and FATAL events of all logs, time-sorted, at most 10 per pattern |
 
-`backend` and `hs_err` are also covered by `facts.py` (`backend_log`, `crash_dumps`); `logscan.py` groups the same
-errors but keeps excerpts and does the other logs too.
+Runtime on ~1.4GB bundles: about 50s with `--no-excerpts`, 2 to 2.5 minutes with excerpts and `--timeline`; ~22MB memory.
+Use `--log` for a quick look.
+
+**Reading the output**
+- A log the bundle lacks is `"present": false` with where it looked; absence is not evidence the log was clean.
+- `signature` (`oom`, `deadlock`, `process_crash`, `disk_full`, `fd_exhaustion`, `licence`, `db_connection`,
+  `run_as_user`) marks a known serious failure; those findings sort first. It is a starter set: a failure matching none
+  is still listed, ranked by level then count.
+- `noise: "scanner-probe"` marks probe traffic (`/.aws/`, `wp-login`, nginx "No such file"); it sorts last, still counted.
+- With a window, files wholly outside it show `skipped_outside_window`. `time_filter` is `not_applicable` for dmesg
+  (seconds since boot), stacks and codeenv (no wall-clock time). Installer lines without a time follow the last timed record.
+- Each log's `tz` names its clock. backend, frontend, ipython, eventserver, supervisord and nginx use the host's local
+  time with no zone recorded; hs_err states its own zone; dmesg is boot-relative and stays off the timeline
+  (`logs_with_untimed_events`). Order across logs is therefore approximate, to the host's UTC offset.
+- For "what happened around the crash": `--around <hs_err time> --window 30m --timeline --no-excerpts`, then open the
+  `where` pointers.
+
+`facts.py` (`backend_log`, `crash_dumps`) covers backend and hs_err as counts; `logscan.py` adds excerpts and the other logs.
 
 ## Line formats
 
@@ -74,13 +93,13 @@ line that starts a record). `install.log` and `supervisord.log` are not rotated 
 
 ## Masking and what is safe to quote
 
-Log lines carry user names (`user=...`), email addresses, client IPs, project keys, scenario and dataset ids, URL
-hosts, licence file names and request paths. The reader's other tools print counts only. `logscan.py` excerpts
-replace these with `<user>`, `<email>`, `<ip>`, `<host>`, `<project>`, `<id>`, `<licence>`, `<secret>`,
-`<cgroup>`. This is best effort: a project key written in an unusual place can survive, so a person must look at an
-excerpt before it leaves the machine. Patterns are masked the same way and are the safe thing to quote. The
-`first_seen_at` pointer (`run/backend.log:48213`) is a bundle path and a line number, never log text, so a reader can
-open the original line.
+Log lines carry user names, emails, client IPs, project keys, scenario/dataset/recipe ids, URL hosts, licence file names
+and paths. `logscan.py` and `facts.py` (same masking) replace them with `<user>`, `<email>`, `<ip>`, `<host>`,
+`<project>`, `<id>`, `<name>` (recipe, dataset, webapp files), `<plugin>`, `<path>`, `<licence>`, `<secret>`,
+`<cgroup>`; a thread name keeps only its alphabetic prefix. `bundle_root` and `mirror` are a folder name and a relative
+path. Masking is best effort: a project key in an unusual place can survive, so look at an excerpt before it leaves
+the machine. Patterns are the safe thing to quote. `first_seen_at` (`run/backend.log:48213`) is a path and line number,
+never log text; use it to open the original line.
 
 ## Gaps
 

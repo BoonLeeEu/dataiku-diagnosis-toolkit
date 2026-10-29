@@ -9,6 +9,26 @@ adheres to [Semantic Versioning](https://semver.org/). The version tracked here 
 Versioning is scoped to this directory (`dataiku-diagnosis-reader/`) only, since it's the unit
 that gets copied/symlinked into a skills root independently of the rest of this repo.
 
+## [0.24.0] - 2026-10-29
+
+### Added
+
+- `scripts/logscan.py` triage: findings matching a known serious signature (`oom`, `deadlock`, `process_crash`, `disk_full`, `fd_exhaustion`, `licence`, `db_connection`, `run_as_user`) carry `signature`, sort first and are never cut by `--top`; scanner-probe findings carry `noise` and sort last.
+- `logscan.py --since/--until/--around/--window` narrow every wall-clock log to an incident window (files wholly outside are skipped; dmesg, stacks and code-env logs report `time_filter: not_applicable`). `--timeline` adds one merged, time-sorted list of signature and FATAL events with a per-log `tz`. Each log reports its `tz`.
+- `tests/test_logscan.py`: synthetic-bundle tests (`python3 -I -m unittest discover -s tests`).
+
+### Changed
+
+- `logscan.py` output: `bundle_root` is the folder name and `mirror` a path relative to it (were absolute paths). Install log: a Python `Traceback` header is no longer its own finding; the final exception line is.
+- `facts.py` `backend_log.top_error_patterns` now reuses `logscan.py`'s masking and normalisation (it was less thorough and could carry identifiers). Falls back to the logger name alone if `logscan.py` is absent.
+- Masking also covers thread-name suffixes, webapp run ids, recipe/dataset/webapp file names, plugin ids and install/data paths; the two shapes of one trigger-runner error now group together.
+
+### Fixed
+
+- hs_err (and dmesg) first/last were ordered as text, so `last` could precede `first`; they are now ordered by parsed time.
+- Excerpts no longer stop at the first blank line.
+- Documented `logscan.py` runtime: about 50s with `--no-excerpts`, 2 to 2.5 minutes with excerpts and `--timeline` (the 0.23.0 "about 20s" was wrong).
+
 ## [0.23.0] - 2026-10-28
 
 ### Added

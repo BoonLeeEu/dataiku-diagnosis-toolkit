@@ -537,22 +537,39 @@ PATTERN_CAP, PATTERN_TOP, PATTERN_WIDTH = 500, 10, 120
 CRASH_DUMP_LINES = 3000
 
 
+_LOGSCAN = []
+
+
+def _logscan():
+    """`logscan.py` next to this file, loaded by path so it works under `python -I`; None if it is missing."""
+    if not _LOGSCAN:
+        import importlib.util
+        path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logscan.py")
+        mod = None
+        if os.path.isfile(path):
+            spec = importlib.util.spec_from_file_location("logscan", path)
+            mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mod)
+        _LOGSCAN.append(mod)
+    return _LOGSCAN[0]
+
+
 def error_pattern(rest):
-    """A stable key for an ERROR/FATAL line: the logger plus the message's first clause (up to the first ": "), with quoted
-    text, project keys and numbers replaced, so repeats of one failure group together. `rest` is the line after the level token."""
+    """A stable key for an ERROR/FATAL line: the logger plus the message's first clause, masked and normalised exactly as
+    `logscan.py` does (emails, hosts, users, project keys, ids, quoted text, numbers), so repeats of one failure group together
+    and the text carries no identifiers. `rest` is the line after the level token. Without `logscan.py` beside this file only
+    the logger is kept."""
     m = re.match(r"\s*\[([^\]]*)\]\s*(?:-\s*)?(.*)", rest.decode("utf-8", "replace"), re.S)
     logger, msg = (m.group(1), m.group(2)) if m else ("", rest.decode("utf-8", "replace"))
-    msg = re.sub(r"'[^']*'|\"[^\"]*\"", "'<x>'", msg.strip())
-    msg = re.sub(r"\b[A-Z][A-Z0-9_]{2,}(?:\.[\w-]+)+", "<KEY>", msg)
-    msg = re.sub(r"\d+", "N", msg.split(": ", 1)[0])
-    return f"[{logger}] {msg}"[:PATTERN_WIDTH]
+    ls = _logscan()
+    return f"[{logger}] {ls.normalise(msg) if ls else ''}".strip()[:PATTERN_WIDTH]
 
 
 @fact("backend_log")
 def backend_log():
     """Counts per backend log file (`backend.log`, `.1`, `.2`, ...): lines at ERROR, FATAL and WARN, lines naming an
     OutOfMemoryError, and the file's first and last timestamp, so every count carries its window. Streams each file line by
-    line (they run to ~100MB) and prints counts only, never log text. Compressed rotations are not read (`gz_files_skipped`)."""
+    line (they run to ~100MB) and prints counts plus masked, normalised error patterns (no raw log lines). Compressed rotations are not read (`gz_files_skipped`)."""
     rel = "run"
     base = os.path.join(MIRROR, rel)
     if not os.path.isdir(base):
