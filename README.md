@@ -162,8 +162,9 @@ changing a skill, a calibration, or the model you use.
 **Tiers 1–2** need the one-time setup. `scripts/test.sh` adds `pytest` to the review generator's
 `.venv` on first run. Two tests skip by design:
 - The golden deck test skips without the branding template.
-- The drift test skips without the sibling `../Dataiku Review Generator` and `../Diagnosis Reader`
-  checkouts. Override their locations with `DATAIKU_REVIEW_GENERATOR_REPO` /
+- The drift test skips without the sibling review generator and diagnosis reader checkouts
+  (`../Dataiku Review Generator` or `../dataiku-review-generator`; `../Diagnosis Reader` or
+  `../dataiku-diagnosis-reader`). Override their locations with `DATAIKU_REVIEW_GENERATOR_REPO` /
   `DATAIKU_DIAGNOSIS_READER_REPO`.
 
 **Tier 3 and model changes.** The eval scenarios are synthetic bundles under `tests/fixtures/`.

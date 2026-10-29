@@ -114,7 +114,7 @@ remind the user afterward to also run Codex, so Codex can pick up the changes â€
 adapts to Claude-side changes post-hoc (see `AGENTS.md`) and won't see these updates otherwise.
 
 Whenever Claude makes or discusses an update to `skills/dataiku-diagnosis-reader/`, remind the user to make the change in the upstream repo
-(`github.com/boonleeeu-dataiku/dataiku-diagnosis-reader`, sibling checkout `../Diagnosis Reader/`)
+(`github.com/boonleeeu-dataiku/dataiku-diagnosis-reader`, sibling checkout, named `../Diagnosis Reader/` or `../dataiku-diagnosis-reader/` depending on the machine; `tests/test_vendored_drift.py` tries both, or set `DATAIKU_DIAGNOSIS_READER_REPO`)
 and re-sync it here, so the next sync doesn't silently overwrite it. Likewise remind them to run
 Codex afterward, since the skill copy is also read by Codex.
 

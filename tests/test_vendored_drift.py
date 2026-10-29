@@ -14,8 +14,27 @@ import pytest
 from conftest import REPO_ROOT
 
 PARENT = REPO_ROOT.parent
-REVIEW_GENERATOR = Path(os.environ.get("DATAIKU_REVIEW_GENERATOR_REPO", PARENT / "Dataiku Review Generator"))
-DIAGNOSIS_READER = Path(os.environ.get("DATAIKU_DIAGNOSIS_READER_REPO", PARENT / "Diagnosis Reader"))
+
+
+def _checkout(env_var: str, *names: str) -> Path:
+    """The upstream checkout: the env var if set, else the first sibling folder that exists.
+
+    The folder name differs between machines, so several are tried. When none exists the first
+    candidate is returned and the skip message lists them all."""
+    if os.environ.get(env_var):
+        return Path(os.environ[env_var])
+    candidates = [PARENT / n for n in names]
+    return next((c for c in candidates if c.is_dir()), candidates[0])
+
+
+_GENERATOR_NAMES = ("Dataiku Review Generator", "dataiku-review-generator")
+_READER_NAMES = ("Diagnosis Reader", "dataiku-diagnosis-reader")
+REVIEW_GENERATOR = _checkout("DATAIKU_REVIEW_GENERATOR_REPO", *_GENERATOR_NAMES)
+DIAGNOSIS_READER = _checkout("DATAIKU_DIAGNOSIS_READER_REPO", *_READER_NAMES)
+_TRIED = {
+    REVIEW_GENERATOR: f"{', '.join(_GENERATOR_NAMES)} (or set DATAIKU_REVIEW_GENERATOR_REPO)",
+    DIAGNOSIS_READER: f"{', '.join(_READER_NAMES)} (or set DATAIKU_DIAGNOSIS_READER_REPO)",
+}
 
 IGNORE = {".DS_Store", "__pycache__", ".pytest_cache", "node_modules", "dist", ".venv", "resources", "output"}
 
@@ -47,7 +66,7 @@ def _diff(a: Path, b: Path, rel: str = "") -> list[str]:
 @pytest.mark.parametrize("upstream,src,dest", VENDORED, ids=[d for _, _, d in VENDORED])
 def test_vendored_copy_matches_upstream(upstream, src, dest):
     if not upstream.is_dir():
-        pytest.skip(f"upstream checkout not found at {upstream}")
+        pytest.skip(f"upstream checkout not found; looked for a sibling of {PARENT.name}/ named {_TRIED[upstream]}")
     a, b = upstream / src, REPO_ROOT / dest
     assert a.exists(), f"{a} is missing upstream"
     if a.is_file():
