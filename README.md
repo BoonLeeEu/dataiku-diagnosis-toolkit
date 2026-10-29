@@ -30,7 +30,7 @@ spreadsheet.
   appendix of Fail / Partial / Needs Review rows), with a `narrative.json` that the agent drafts
   from each bundle's own checklist on every run (the tool validates it against item statuses). A build
   without a narrative, possible only from the plain script, falls back to generic text derived from cells.
-- **`skills/dataiku-diagnosis-log-review/`** — reads the bundle's major logs for errors and warnings, gives each a
+- **`skills/dataiku-diagnosis-log-review/`** — **experimental, off by default: runs only when you explicitly ask for a log review.** Reads the bundle's major logs for errors and warnings, gives each a
   root cause (or what to check next, and where) and numbered mitigation steps, and writes one workbook: an
   `Overview` sheet that summarises every log and links each finding to its row, plus one sheet per log. Uses the
   reader's `scripts/logscan.py` (grouped, masked findings) and the `write_log_workbook` tool below; its judgment

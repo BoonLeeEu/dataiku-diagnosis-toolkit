@@ -1,5 +1,7 @@
 # Reading the logs for errors and warnings
 
+> **Experimental, off by default:** run `scripts/logscan.py` only when the user's prompt explicitly asks for log analysis. Do not run it, or produce log-scan output, for any other question.
+
 The logs are large (rotated files ~100MB, ~1GB per bundle): never load one whole. Run `scripts/logscan.py <bundle_root>`.
 It streams each file once and returns, per log, the files (size, time window), WARN/ERROR/FATAL totals and one finding
 per normalised message pattern: count, first/last time, `file:line` of the first sighting, masked excerpt.

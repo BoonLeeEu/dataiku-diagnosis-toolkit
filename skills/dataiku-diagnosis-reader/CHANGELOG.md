@@ -9,6 +9,12 @@ adheres to [Semantic Versioning](https://semver.org/). The version tracked here 
 Versioning is scoped to this directory (`dataiku-diagnosis-reader/`) only, since it's the unit
 that gets copied/symlinked into a skills root independently of the rest of this repo.
 
+## [0.24.1] - 2026-10-29
+
+### Changed
+
+- `scripts/logscan.py` and `references/logs.md` are marked experimental and off by default: run them only when the user explicitly asks for log analysis.
+
 ## [0.24.0] - 2026-10-29
 
 ### Added

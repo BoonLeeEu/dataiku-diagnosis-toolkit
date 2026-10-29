@@ -1,9 +1,14 @@
 ---
 name: "dataiku-diagnosis-log-review"
-description: "Read the major logs of a Dataiku DSS diagnosis bundle for errors and warnings, work out root causes (or what to check next, and where), give step-by-step mitigations, and write one workbook: an Overview sheet plus one sheet per log. Use when the user asks to analyse, triage or find the cause of errors, warnings, crashes or restarts in a Dataiku diagnosis bundle's logs, or asks for a log review of one."
+description: "EXPERIMENTAL, OFF BY DEFAULT: use only when the user explicitly asks for a log review (or log analysis/triage) of a Dataiku diagnosis bundle. Reads the major logs for errors and warnings, works out root causes and mitigations, and writes one workbook: an Overview sheet plus one sheet per log. Never use it for a checklist review, a deck, or a general bundle question, even when those mention errors or crashes."
 ---
 
 # Dataiku diagnosis log review
+
+> **Experimental, off by default.** This feature is still being developed. Run it only when the user's prompt explicitly
+> asks for a log review or log analysis of a bundle. Otherwise do not run `scripts/logscan.py`, do not read the logs to
+> produce findings, and do not write a log workbook. If the request only hints at it (a crash question, "any errors?"),
+> answer from the reader's other files and offer the log review in one line instead of starting it.
 
 Given a Dataiku DSS diagnosis bundle directory, scan its major logs for errors and warnings, explain each finding, say
 what to do about it, and write the result to a workbook: an `Overview` sheet summarising every log (with a link from

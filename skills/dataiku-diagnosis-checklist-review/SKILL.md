@@ -14,6 +14,10 @@ interpreter (e.g. `python3.12`, or the review generator's `.venv/bin/python3`). 
 openpyxl and re-run themselves under the plugin's own virtualenv when the default Python lacks it; if it can't find one,
 set `DATAIKU_PYTHON` to a Python 3.10+ that has openpyxl.
 
+**Log analysis is off here.** The log review is experimental and runs only when the user explicitly asks for it. Do not run
+the reader's `scripts/logscan.py`, do not invoke the log-review skill and do not produce log findings or a log workbook
+as part of this review. Reading a specific log line as evidence for a single check stays as it is.
+
 ## Reference files (in this skill's `references/` directory)
 
 - `notes-format.md` — the `notes` format and length budget. Read before writing the first `notes` (step 4).

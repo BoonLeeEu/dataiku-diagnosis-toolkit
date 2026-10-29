@@ -75,7 +75,7 @@ records install/enable state on *any* node type (see `references/data-dir-config
 
 ## Reading the logs
 
-For errors and warnings across all the logs, use `scripts/logscan.py` and `references/logs.md` (per-log formats, signatures, masking).
+For errors and warnings across all the logs, when the user explicitly asks for log analysis (experimental, off by default), use `scripts/logscan.py` and `references/logs.md` (per-log formats, signatures, masking).
 
 **Line format.** `backend.log` lines look like `[2026/07/21-08:56:51.095] [thread] [LEVEL] [logger]
 - message`: the level is a **bracketed token mid-line**, after the timestamp and thread name. Match
